@@ -27,11 +27,13 @@
 
   <title>Daily Collection</title>
 
+
   <style>
 
     * {
       box-sizing: border-box;
     }
+
 
     body {
       margin: 0;
@@ -40,6 +42,7 @@
       color: #111827;
     }
 
+
     .header {
       background: #166534;
       color: white;
@@ -47,15 +50,18 @@
       text-align: center;
     }
 
+
     .header h2 {
       margin: 0 0 8px;
     }
+
 
     .container {
       max-width: 600px;
       margin: auto;
       padding: 15px;
     }
+
 
     .card {
       background: white;
@@ -65,11 +71,13 @@
       box-shadow: 0 2px 8px rgba(0,0,0,.08);
     }
 
+
     label {
       display: block;
       font-weight: bold;
       margin: 12px 0 6px;
     }
+
 
     input,
     select,
@@ -79,12 +87,25 @@
       border: 1px solid #d1d5db;
       border-radius: 8px;
       font-size: 16px;
+      background: white;
+      color: #111827;
     }
+
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #166534;
+      box-shadow: 0 0 0 2px rgba(22,101,52,.12);
+    }
+
 
     textarea {
       min-height: 90px;
       resize: vertical;
     }
+
 
     button {
       width: 100%;
@@ -97,19 +118,23 @@
       cursor: pointer;
     }
 
+
     button:active {
       transform: scale(.99);
     }
+
 
     .search {
       background: #2563eb;
       color: white;
     }
 
+
     .save {
       background: #16a34a;
       color: white;
     }
+
 
     .info {
       background: #f0fdf4;
@@ -118,21 +143,26 @@
       margin-top: 12px;
     }
 
+
     .info-row {
       padding: 7px 0;
     }
+
 
     .label {
       font-weight: bold;
     }
 
+
     .online {
       color: #bbf7d0;
     }
 
+
     .offline {
       color: #fecaca;
     }
+
 
     .message {
       display: none;
@@ -141,11 +171,13 @@
       border-radius: 8px;
     }
 
+
     .success {
       display: block;
       background: #dcfce7;
       color: #166534;
     }
+
 
     .error {
       display: block;
@@ -153,13 +185,16 @@
       color: #991b1b;
     }
 
+
     .customer {
       display: none;
     }
 
+
     .hidden {
       display: none;
     }
+
 
     .pending {
       background: #fff7ed;
@@ -167,6 +202,30 @@
       padding: 12px;
       border-radius: 8px;
       margin-top: 10px;
+    }
+
+
+    .payment-for-box {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+
+
+    .payment-for-help {
+      color: #1e40af;
+      font-size: 13px;
+      margin-top: 6px;
+      line-height: 1.4;
+    }
+
+
+    .sync-status {
+      font-size: 13px;
+      margin-top: 8px;
+      color: #166534;
     }
 
   </style>
@@ -214,6 +273,14 @@
         0
       </strong>
 
+    </div>
+
+
+    <div
+      id="syncStatus"
+      class="sync-status"
+    >
+      Automatic synchronization is enabled.
     </div>
 
   </div>
@@ -423,6 +490,34 @@
     </select>
 
 
+    <!-- PAYMENT FOR -->
+
+    <div class="payment-for-box">
+
+      <label style="margin-top: 0;">
+        Payment For
+      </label>
+
+
+      <input
+        id="paymentFor"
+        type="month"
+      >
+
+
+      <div class="payment-for-help">
+
+        Select the month this money is actually for.
+
+        <br>
+
+        The payment date and payment-for month are stored separately.
+
+      </div>
+
+    </div>
+
+
     <!-- ADVANCE -->
 
     <div
@@ -457,7 +552,7 @@
         <br><br>
 
 
-        Starting Date:
+        Starting Month:
 
         <strong id="advanceStartDate">
           -
@@ -467,7 +562,7 @@
         <br><br>
 
 
-        Ending Date:
+        Ending Month:
 
         <strong id="advanceEndDate">
           -
@@ -533,8 +628,7 @@
  * GOOGLE APPS SCRIPT URL
  *
  * IMPORTANT:
- * Replace the value below with your actual
- * Google Apps Script Web App URL.
+ * Replace this with your actual Apps Script Web App URL.
  ********************************************************/
 
 const API_URL =
@@ -542,23 +636,12 @@ const API_URL =
 
 
 /********************************************************
- * AUTOMATIC SYNC SETTINGS
+ * AUTOMATIC SYNC
  ********************************************************/
-
-/*
- * Automatic synchronization interval.
- *
- * 5000 = 5 seconds
- */
 
 const AUTO_SYNC_INTERVAL =
   5000;
 
-
-/*
- * Prevent multiple synchronization requests
- * from running at the same time.
- */
 
 let syncInProgress =
   false;
@@ -599,29 +682,20 @@ function startApplication() {
   );
 
 
-  /*
-   * Update connection status immediately.
-   */
-
   updateConnectionStatus();
 
-
-  /*
-   * Update local counts.
-   */
 
   updateCounts();
 
 
-  /*
-   * Register service worker.
-   */
+  setDefaultPaymentFor();
+
 
   registerServiceWorker();
 
 
   /*
-   * Synchronize immediately if online.
+   * Sync immediately when application starts.
    */
 
   if (
@@ -634,7 +708,7 @@ function startApplication() {
 
 
   /*
-   * AUTOMATIC SYNC EVERY 5 SECONDS.
+   * Automatic synchronization every 5 seconds.
    */
 
   setInterval(
@@ -659,9 +733,7 @@ function startApplication() {
 
 
 /*
- * Start application.
- *
- * This is deliberately outside the window load event.
+ * Start immediately.
  */
 
 startApplication();
@@ -856,6 +928,59 @@ function updateCounts() {
 
 
 /********************************************************
+ * DEFAULT PAYMENT MONTH
+ ********************************************************/
+
+function setDefaultPaymentFor() {
+
+  const input =
+    document.getElementById(
+      'paymentFor'
+    );
+
+
+  if (!input) {
+
+    return;
+
+  }
+
+
+  /*
+   * Default to the current month.
+   *
+   * Example:
+   * August 30, 2026 -> 2026-08
+   */
+
+  const today =
+    new Date();
+
+
+  const year =
+    today.getFullYear();
+
+
+  const month =
+    String(
+      today.getMonth() + 1
+    )
+    .padStart(
+      2,
+      '0'
+    );
+
+
+  input.value =
+    year + '-' + month;
+
+
+  calculateAdvance();
+
+}
+
+
+/********************************************************
  * SEARCH CUSTOMER
  ********************************************************/
 
@@ -889,6 +1014,7 @@ function searchCustomer() {
 
   const customer =
     customers.find(
+
       function(item) {
 
         return String(
@@ -899,6 +1025,7 @@ function searchCustomer() {
         === crf;
 
       }
+
     );
 
 
@@ -911,9 +1038,13 @@ function searchCustomer() {
 
 
     showMessage(
+
       'searchMessage',
+
       'Customer not found on this phone. Automatic synchronization will update customer data when available.',
+
       false
+
     );
 
     return;
@@ -1001,7 +1132,9 @@ function displayCustomer(
     ];
 
 
-  if (payment) {
+  if (
+    payment
+  ) {
 
     document.getElementById(
       'lastPaidDate'
@@ -1108,6 +1241,79 @@ function paymentTypeChanged() {
 
 
 /********************************************************
+ * GET PAYMENT-FOR DATE
+ ********************************************************/
+
+function getPaymentForDate() {
+
+  const value =
+    document.getElementById(
+      'paymentFor'
+    ).value;
+
+
+  if (!value) {
+
+    return null;
+
+  }
+
+
+  /*
+   * HTML month input gives:
+   *
+   * YYYY-MM
+   *
+   * We use day 1 internally.
+   */
+
+  const parts =
+    value.split('-');
+
+
+  if (
+    parts.length !== 2
+  ) {
+
+    return null;
+
+  }
+
+
+  const year =
+    Number(
+      parts[0]
+    );
+
+
+  const month =
+    Number(
+      parts[1]
+    );
+
+
+  if (
+    !year ||
+    !month ||
+    month < 1 ||
+    month > 12
+  ) {
+
+    return null;
+
+  }
+
+
+  return new Date(
+    year,
+    month - 1,
+    1
+  );
+
+}
+
+
+/********************************************************
  * ADVANCE CALCULATION
  ********************************************************/
 
@@ -1141,35 +1347,54 @@ function calculateAdvance() {
     monthly.toFixed(2);
 
 
-  const today =
-    new Date();
+  const paymentForDate =
+    getPaymentForDate();
 
 
-  document.getElementById(
-    'advanceStartDate'
-  ).innerText =
-    formatDate(
-      today
-    );
+  if (
+    !paymentForDate
+  ) {
+
+    document.getElementById(
+      'advanceStartDate'
+    ).innerText =
+      '-';
 
 
-  document.getElementById(
-    'advanceEndDate'
-  ).innerText =
-    formatDate(
+    document.getElementById(
+      'advanceEndDate'
+    ).innerText =
+      '-';
 
-      addMonths(
+  } else {
 
-        today,
+    document.getElementById(
+      'advanceStartDate'
+    ).innerText =
+      formatMonth(
+        paymentForDate
+      );
 
-        Math.max(
-          months - 1,
-          0
+
+    document.getElementById(
+      'advanceEndDate'
+    ).innerText =
+      formatMonth(
+
+        addMonths(
+
+          paymentForDate,
+
+          Math.max(
+            months - 1,
+            0
+          )
+
         )
 
-      )
+      );
 
-    );
+  }
 
 
   document.getElementById(
@@ -1189,9 +1414,13 @@ function saveCollection() {
   if (!currentCustomer) {
 
     showMessage(
+
       'saveMessage',
+
       'Please search for a customer first.',
+
       false
+
     );
 
     return;
@@ -1213,9 +1442,13 @@ function saveCollection() {
   ) {
 
     showMessage(
+
       'saveMessage',
+
       'Please enter a valid amount.',
+
       false
+
     );
 
     return;
@@ -1227,6 +1460,33 @@ function saveCollection() {
     document.getElementById(
       'paymentType'
     ).value;
+
+
+  /*
+   * Get the month the payment is for.
+   */
+
+  const paymentForDate =
+    getPaymentForDate();
+
+
+  if (
+    !paymentForDate
+  ) {
+
+    showMessage(
+
+      'saveMessage',
+
+      'Please select the month this payment is for.',
+
+      false
+
+    );
+
+    return;
+
+  }
 
 
   let months =
@@ -1251,9 +1511,13 @@ function saveCollection() {
     ) {
 
       showMessage(
+
         'saveMessage',
+
         'Please enter a valid number of months.',
+
         false
+
       );
 
       return;
@@ -1271,7 +1535,12 @@ function saveCollection() {
     .trim();
 
 
-  const today =
+  /*
+   * THIS is the actual date the customer
+   * gave the money.
+   */
+
+  const transactionDate =
     new Date();
 
 
@@ -1292,11 +1561,25 @@ function saveCollection() {
       transactionId:
         createTransactionId(),
 
+      /*
+       * Actual payment date.
+       *
+       * Example:
+       * Customer pays on 30 August.
+       */
+
       transactionDate:
-        today.toISOString(),
+        transactionDate.toISOString(),
+
+      /*
+       * Month the payment belongs to.
+       *
+       * Example:
+       * Payment made in August but for April.
+       */
 
       coveredDate:
-        today.toISOString(),
+        paymentForDate.toISOString(),
 
       crf:
         currentCustomer.crf,
@@ -1336,10 +1619,29 @@ function saveCollection() {
       i++
     ) {
 
+      /*
+       * Advance starts from the selected
+       * Payment For month.
+       *
+       * Example:
+       *
+       * Payment Date = August
+       * Payment For = September
+       * Months = 3
+       *
+       * Creates:
+       * September
+       * October
+       * November
+       */
+
       const coveredDate =
         addMonths(
-          today,
+
+          paymentForDate,
+
           i
+
         );
 
 
@@ -1348,8 +1650,16 @@ function saveCollection() {
         transactionId:
           createTransactionId(),
 
+        /*
+         * Actual date money was received.
+         */
+
         transactionDate:
-          today.toISOString(),
+          transactionDate.toISOString(),
+
+        /*
+         * Month this particular entry covers.
+         */
 
         coveredDate:
           coveredDate.toISOString(),
@@ -1387,6 +1697,10 @@ function saveCollection() {
   }
 
 
+  /******************************************************
+   * SAVE PENDING COLLECTIONS
+   ******************************************************/
+
   localStorage.setItem(
 
     PENDING_KEY,
@@ -1406,7 +1720,9 @@ function saveCollection() {
 
     currentCustomer.crf,
 
-    today,
+    transactionDate,
+
+    paymentForDate,
 
     amount,
 
@@ -1439,7 +1755,7 @@ function saveCollection() {
 
 
   /*
-   * Attempt immediate synchronization.
+   * Try synchronization immediately.
    */
 
   if (
@@ -1458,11 +1774,19 @@ function saveCollection() {
  ********************************************************/
 
 function updateLocalPaymentSummary(
+
   crf,
+
   transactionDate,
+
+  paymentForDate,
+
   amount,
+
   type,
+
   months
+
 ) {
 
   const payments =
@@ -1481,8 +1805,16 @@ function updateLocalPaymentSummary(
     payments[key];
 
 
+  /*
+   * Paid-through is based on the month the
+   * payment is FOR, not the date the money
+   * was received.
+   */
+
   let paidThrough =
-    transactionDate;
+    new Date(
+      paymentForDate
+    );
 
 
   if (
@@ -1491,12 +1823,20 @@ function updateLocalPaymentSummary(
 
     paidThrough =
       addMonths(
-        transactionDate,
+
+        paymentForDate,
+
         months - 1
+
       );
 
   }
 
+
+  /*
+   * Keep the furthest paid-through date
+   * already stored locally.
+   */
 
   if (
     existing &&
@@ -1524,6 +1864,10 @@ function updateLocalPaymentSummary(
 
   payments[key] = {
 
+    /*
+     * When the money was actually received.
+     */
+
     lastPaymentDate:
       transactionDate.toISOString(),
 
@@ -1532,6 +1876,10 @@ function updateLocalPaymentSummary(
 
     lastPaymentType:
       type,
+
+    /*
+     * What month the payment covers.
+     */
 
     paidThrough:
       paidThrough.toISOString()
@@ -1576,7 +1924,7 @@ function updateLocalPaymentSummary(
 async function syncNow() {
 
   /*
-   * Do nothing when offline.
+   * Do nothing while offline.
    */
 
   if (
@@ -1591,8 +1939,8 @@ async function syncNow() {
 
 
   /*
-   * Don't start another request if one
-   * is already running.
+   * Don't start another sync while
+   * one is already running.
    */
 
   if (
@@ -1623,17 +1971,9 @@ async function syncNow() {
   }
 
 
-  /*
-   * Get pending collections.
-   */
-
   const pending =
     getPending();
 
-
-  /*
-   * Lock synchronization.
-   */
 
   syncInProgress =
     true;
@@ -1859,8 +2199,19 @@ async function syncNow() {
 
 
     /*
-     * Show synchronization message only
-     * when there were pending collections.
+     * Update sync status.
+     */
+
+    document.getElementById(
+      'syncStatus'
+    ).innerText =
+      'Last synchronized: ' +
+      new Date().toLocaleTimeString();
+
+
+    /*
+     * Show message only when there were
+     * pending collections.
      */
 
     if (
@@ -1900,16 +2251,24 @@ async function syncNow() {
 
 
     /*
-     * NEVER remove pending collections
+     * IMPORTANT:
+     *
+     * Never remove pending collections
      * when synchronization fails.
      */
 
     updateCounts();
 
+
+    document.getElementById(
+      'syncStatus'
+    ).innerText =
+      'Waiting for next automatic synchronization...';
+
   } finally {
 
     /*
-     * Release the synchronization lock.
+     * Release the lock.
      */
 
     syncInProgress =
@@ -2011,8 +2370,10 @@ function addMonths(
 
 
   result.setMonth(
+
     result.getMonth() +
     months
+
   );
 
 
@@ -2044,7 +2405,7 @@ function addMonths(
 
 
 /********************************************************
- * DATE DISPLAY
+ * FORMAT DATE
  ********************************************************/
 
 function formatDate(
@@ -2122,6 +2483,79 @@ function formatDate(
 }
 
 
+/********************************************************
+ * FORMAT MONTH
+ ********************************************************/
+
+function formatMonth(
+  date
+) {
+
+  const d =
+    new Date(
+      date
+    );
+
+
+  if (
+    isNaN(
+      d.getTime()
+    )
+  ) {
+
+    return '-';
+
+  }
+
+
+  const months = [
+
+    'JANUARY',
+
+    'FEBRUARY',
+
+    'MARCH',
+
+    'APRIL',
+
+    'MAY',
+
+    'JUNE',
+
+    'JULY',
+
+    'AUGUST',
+
+    'SEPTEMBER',
+
+    'OCTOBER',
+
+    'NOVEMBER',
+
+    'DECEMBER'
+
+  ];
+
+
+  return (
+
+    months[
+      d.getMonth()
+    ] +
+
+    ' ' +
+
+    d.getFullYear()
+
+  );
+
+}
+
+
+/********************************************************
+ * DISPLAY DATE
+ ********************************************************/
+
 function formatDisplayDate(
   value
 ) {
@@ -2187,6 +2621,13 @@ function clearForm() {
     'paymentType'
   ).value =
     'Regular';
+
+
+  /*
+   * Reset Payment For to current month.
+   */
+
+  setDefaultPaymentFor();
 
 
   document.getElementById(
@@ -2284,6 +2725,7 @@ function registerServiceWorker() {
         'service-worker.js'
       )
       .then(
+
         function() {
 
           console.log(
@@ -2291,6 +2733,7 @@ function registerServiceWorker() {
           );
 
         }
+
       )
       .catch(
 
