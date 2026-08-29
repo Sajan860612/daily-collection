@@ -22,7 +22,7 @@
 
   <link
     rel="manifest"
-    href="./manifest.json"
+    href="manifest.json"
   >
 
   <title>Daily Collection</title>
@@ -79,6 +79,11 @@
       border: 1px solid #d1d5db;
       border-radius: 8px;
       font-size: 16px;
+    }
+
+    textarea {
+      min-height: 90px;
+      resize: vertical;
     }
 
     button {
@@ -169,28 +174,9 @@
       margin-top: 10px;
     }
 
-    .status-box {
-      margin-top: 10px;
-      padding: 10px;
-      border-radius: 8px;
-      background: #eff6ff;
-      color: #1e40af;
-      font-size: 14px;
-    }
-
-    .danger {
-      background: #fee2e2;
-      color: #991b1b;
-    }
-
     .syncing {
       opacity: .6;
       pointer-events: none;
-    }
-
-    .small {
-      font-size: 13px;
-      color: #6b7280;
     }
 
   </style>
@@ -217,7 +203,7 @@
 <main class="container">
 
 
-  <!-- STATUS -->
+  <!-- STATUS CARD -->
 
   <div class="card">
 
@@ -242,20 +228,13 @@
 
 
     <button
-      id="syncButton"
       class="sync"
       onclick="syncNow()"
     >
+
       🔄 Sync Now
+
     </button>
-
-
-    <div
-      id="syncStatus"
-      class="status-box"
-    >
-      Waiting...
-    </div>
 
   </div>
 
@@ -419,12 +398,12 @@
     </div>
 
 
-    <!-- COLLECTION -->
-
     <h3>
       Enter Collection
     </h3>
 
+
+    <!-- AMOUNT -->
 
     <label>
       Amount
@@ -440,6 +419,8 @@
       oninput="calculateAdvance()"
     >
 
+
+    <!-- PAYMENT TYPE -->
 
     <label>
       Payment Type
@@ -461,6 +442,8 @@
 
     </select>
 
+
+    <!-- ADVANCE -->
 
     <div
       id="advanceBox"
@@ -520,27 +503,13 @@
           0
         </strong>
 
-
-        <br><br>
-
-
-        <strong>
-          Advance schedule
-        </strong>
-
-
-        <div
-          id="advanceSchedule"
-          class="small"
-          style="margin-top:8px;"
-        >
-        </div>
-
       </div>
 
 
     </div>
 
+
+    <!-- REMARKS -->
 
     <label>
       Remarks
@@ -552,6 +521,8 @@
       placeholder="Optional"
     ></textarea>
 
+
+    <!-- SAVE -->
 
     <button
       class="save"
@@ -579,59 +550,58 @@
 
 
 /********************************************************
- * APPS SCRIPT API
+ * GOOGLE APPS SCRIPT URL
  *
- * WE WILL PUT THE REAL URL HERE LATER.
+ * KEEP THIS AS MYCODE FOR NOW.
+ *
+ * We will replace this in Step 5.
  ********************************************************/
 
-const API_URL = 'PASTE_APPS_SCRIPT_EXEC_URL_HERE';
+const API_URL =
+  'MYCODE';
 
 
 /********************************************************
- * DATABASE
+ * LOCAL STORAGE KEYS
  ********************************************************/
 
-const DB_NAME =
-  'DailyCollectionDB';
-
-const DB_VERSION =
-  1;
-
-const CUSTOMER_STORE =
-  'customers';
-
-const PAYMENT_STORE =
-  'payments';
-
-const PENDING_STORE =
-  'pending';
+const CUSTOMER_KEY =
+  'dailyCollectionCustomers';
 
 
-let db = null;
+const PAYMENT_KEY =
+  'dailyCollectionPayments';
 
-let currentCustomer = null;
 
-let syncing = false;
+const PENDING_KEY =
+  'dailyCollectionPending';
+
+
+const AGENT_KEY =
+  'dailyCollectionAgent';
+
+
+let currentCustomer =
+  null;
 
 
 /********************************************************
- * START APPLICATION
+ * START
  ********************************************************/
 
 window.addEventListener(
   'load',
-  async function() {
+  function() {
 
     updateConnectionStatus();
 
-    await openDatabase();
-
-    await updateCounts();
+    updateCounts();
 
     registerServiceWorker();
 
+
     /*
-     * If internet exists,
+     * If already online,
      * try synchronization.
      */
 
@@ -667,10 +637,6 @@ window.addEventListener(
 
     updateConnectionStatus();
 
-    setSyncStatus(
-      'Offline. Collections will be stored on this phone.'
-    );
-
   }
 );
 
@@ -705,420 +671,93 @@ function updateConnectionStatus() {
 
 
 /********************************************************
- * INDEXED DB
+ * LOCAL STORAGE
  ********************************************************/
 
-function openDatabase() {
+function getCustomers() {
 
-  return new Promise(
-    function(resolve, reject) {
+  try {
 
-      const request =
-        indexedDB.open(
-          DB_NAME,
-          DB_VERSION
-        );
+    return JSON.parse(
 
+      localStorage.getItem(
+        CUSTOMER_KEY
+      ) || '[]'
 
-      request.onupgradeneeded =
-        function(event) {
-
-          const database =
-            event.target.result;
-
-
-          if (
-            !database.objectStoreNames.contains(
-              CUSTOMER_STORE
-            )
-          ) {
-
-            database.createObjectStore(
-              CUSTOMER_STORE,
-              {
-                keyPath: 'crf'
-              }
-            );
-
-          }
-
-
-          if (
-            !database.objectStoreNames.contains(
-              PAYMENT_STORE
-            )
-          ) {
-
-            database.createObjectStore(
-              PAYMENT_STORE,
-              {
-                keyPath: 'crf'
-              }
-            );
-
-          }
-
-
-          if (
-            !database.objectStoreNames.contains(
-              PENDING_STORE
-            )
-          ) {
-
-            database.createObjectStore(
-              PENDING_STORE,
-              {
-                keyPath: 'transactionId'
-              }
-            );
-
-          }
-
-        };
-
-
-      request.onsuccess =
-        function(event) {
-
-          db =
-            event.target.result;
-
-          resolve(db);
-
-        };
-
-
-      request.onerror =
-        function() {
-
-          reject(
-            request.error
-          );
-
-        };
-
-    }
-  );
-
-}
-
-
-/********************************************************
- * DB HELPERS
- ********************************************************/
-
-function dbPut(
-  storeName,
-  value
-) {
-
-  return new Promise(
-    function(resolve, reject) {
-
-      const transaction =
-        db.transaction(
-          storeName,
-          'readwrite'
-        );
-
-
-      const store =
-        transaction.objectStore(
-          storeName
-        );
-
-
-      const request =
-        store.put(
-          value
-        );
-
-
-      request.onsuccess =
-        function() {
-
-          resolve();
-
-        };
-
-
-      request.onerror =
-        function() {
-
-          reject(
-            request.error
-          );
-
-        };
-
-    }
-  );
-
-}
-
-
-function dbGet(
-  storeName,
-  key
-) {
-
-  return new Promise(
-    function(resolve, reject) {
-
-      const transaction =
-        db.transaction(
-          storeName,
-          'readonly'
-        );
-
-
-      const store =
-        transaction.objectStore(
-          storeName
-        );
-
-
-      const request =
-        store.get(
-          key
-        );
-
-
-      request.onsuccess =
-        function() {
-
-          resolve(
-            request.result
-          );
-
-        };
-
-
-      request.onerror =
-        function() {
-
-          reject(
-            request.error
-          );
-
-        };
-
-    }
-  );
-
-}
-
-
-function dbGetAll(
-  storeName
-) {
-
-  return new Promise(
-    function(resolve, reject) {
-
-      const transaction =
-        db.transaction(
-          storeName,
-          'readonly'
-        );
-
-
-      const store =
-        transaction.objectStore(
-          storeName
-        );
-
-
-      const request =
-        store.getAll();
-
-
-      request.onsuccess =
-        function() {
-
-          resolve(
-            request.result || []
-          );
-
-        };
-
-
-      request.onerror =
-        function() {
-
-          reject(
-            request.error
-          );
-
-        };
-
-    }
-  );
-
-}
-
-
-function dbDelete(
-  storeName,
-  key
-) {
-
-  return new Promise(
-    function(resolve, reject) {
-
-      const transaction =
-        db.transaction(
-          storeName,
-          'readwrite'
-        );
-
-
-      const store =
-        transaction.objectStore(
-          storeName
-        );
-
-
-      const request =
-        store.delete(
-          key
-        );
-
-
-      request.onsuccess =
-        function() {
-
-          resolve();
-
-        };
-
-
-      request.onerror =
-        function() {
-
-          reject(
-            request.error
-          );
-
-        };
-
-    }
-  );
-
-}
-
-
-/********************************************************
- * CUSTOMERS
- ********************************************************/
-
-async function getCustomers() {
-
-  return await dbGetAll(
-    CUSTOMER_STORE
-  );
-
-}
-
-
-async function saveCustomers(
-  customers
-) {
-
-  for (
-    let i = 0;
-    i < customers.length;
-    i++
-  ) {
-
-    await dbPut(
-      CUSTOMER_STORE,
-      customers[i]
     );
+
+  } catch (error) {
+
+    return [];
 
   }
 
 }
 
 
-async function findLocalCustomer(
-  crf
-) {
+function getPayments() {
 
-  const customers =
-    await getCustomers();
+  try {
 
+    return JSON.parse(
 
-  const searchCRF =
-    String(
-      crf
-    )
-    .trim()
-    .toUpperCase();
+      localStorage.getItem(
+        PAYMENT_KEY
+      ) || '{}'
 
+    );
 
-  for (
-    let i = 0;
-    i < customers.length;
-    i++
-  ) {
+  } catch (error) {
 
-    if (
-      String(
-        customers[i].crf
-      )
-      .trim()
-      .toUpperCase()
-      === searchCRF
-    ) {
-
-      return customers[i];
-
-    }
+    return {};
 
   }
-
-
-  return null;
 
 }
 
 
-/********************************************************
- * COUNTS
- ********************************************************/
+function getPending() {
 
-async function updateCounts() {
+  try {
 
-  const customers =
-    await getCustomers();
+    return JSON.parse(
 
+      localStorage.getItem(
+        PENDING_KEY
+      ) || '[]'
 
-  const pending =
-    await dbGetAll(
-      PENDING_STORE
     );
 
+  } catch (error) {
+
+    return [];
+
+  }
+
+}
+
+
+function updateCounts() {
 
   document.getElementById(
     'customerCount'
   ).innerText =
-    customers.length;
+    getCustomers().length;
 
 
   document.getElementById(
     'pendingCount'
   ).innerText =
-    pending.length;
+    getPending().length;
 
 }
 
 
 /********************************************************
- * SEARCH
+ * SEARCH CUSTOMER
  ********************************************************/
 
-async function searchCustomer() {
+function searchCustomer() {
 
   const crf =
     document.getElementById(
@@ -1142,9 +781,22 @@ async function searchCustomer() {
   }
 
 
+  const customers =
+    getCustomers();
+
+
   const customer =
-    await findLocalCustomer(
-      crf
+    customers.find(
+      function(item) {
+
+        return String(
+          item.crf
+        )
+        .trim()
+        .toUpperCase()
+        === crf;
+
+      }
     );
 
 
@@ -1158,9 +810,7 @@ async function searchCustomer() {
 
     showMessage(
       'searchMessage',
-      navigator.onLine
-        ? 'Customer not found. Try Sync Now to download the latest customer list.'
-        : 'Customer is not available on this phone. Please connect to internet and sync.',
+      'Customer not found on this phone. Please sync while internet is available.',
       false
     );
 
@@ -1178,7 +828,7 @@ async function searchCustomer() {
   );
 
 
-  await displayCustomer(
+  displayCustomer(
     customer
   );
 
@@ -1189,9 +839,7 @@ async function searchCustomer() {
  * DISPLAY CUSTOMER
  ********************************************************/
 
-async function displayCustomer(
-  customer
-) {
+function displayCustomer(customer) {
 
   document.getElementById(
     'customerCard'
@@ -1235,19 +883,18 @@ async function displayCustomer(
     customer.area || '';
 
 
-  const key =
-    String(
-      customer.crf
-    )
-    .trim()
-    .toUpperCase();
+  const payments =
+    getPayments();
 
 
   const payment =
-    await dbGet(
-      PAYMENT_STORE,
-      key
-    );
+    payments[
+      String(
+        customer.crf
+      )
+      .trim()
+      .toUpperCase()
+    ];
 
 
   if (payment) {
@@ -1273,10 +920,8 @@ async function displayCustomer(
     document.getElementById(
       'lastAmount'
     ).innerText =
-      Number(
-        payment.lastPaymentAmount || 0
-      )
-      .toFixed(2);
+      payment.lastPaymentAmount ||
+      0;
 
 
     document.getElementById(
@@ -1302,7 +947,7 @@ async function displayCustomer(
     document.getElementById(
       'lastAmount'
     ).innerText =
-      '0.00';
+      '0';
 
 
     document.getElementById(
@@ -1358,52 +1003,7 @@ function paymentTypeChanged() {
 
 /********************************************************
  * ADVANCE CALCULATION
- *
- * RULE:
- *
- * First month = actual payment day.
- *
- * All following months = first day
- * of that month.
- *
- * Example:
- *
- * 29-08-2026
- * 01-09-2026
- * 01-10-2026
- * 01-11-2026
  ********************************************************/
-
-function getAdvanceDate(
-  startDate,
-  index
-) {
-
-  const start =
-    new Date(
-      startDate
-    );
-
-
-  if (
-    index === 0
-  ) {
-
-    return new Date(
-      start
-    );
-
-  }
-
-
-  return new Date(
-    start.getFullYear(),
-    start.getMonth() + index,
-    1
-  );
-
-}
-
 
 function calculateAdvance() {
 
@@ -1439,29 +1039,23 @@ function calculateAdvance() {
     new Date();
 
 
-  const endDate =
-    getAdvanceDate(
-      today,
-      Math.max(
-        months - 1,
-        0
-      )
-    );
-
-
   document.getElementById(
     'advanceStartDate'
   ).innerText =
-    formatDate(
-      today
-    );
+    formatDate(today);
 
 
   document.getElementById(
     'advanceEndDate'
   ).innerText =
     formatDate(
-      endDate
+      addMonths(
+        today,
+        Math.max(
+          months - 1,
+          0
+        )
+      )
     );
 
 
@@ -1470,40 +1064,6 @@ function calculateAdvance() {
   ).innerText =
     months;
 
-
-  let html = '';
-
-
-  for (
-    let i = 0;
-    i < months;
-    i++
-  ) {
-
-    const date =
-      getAdvanceDate(
-        today,
-        i
-      );
-
-
-    html +=
-      'Month ' +
-      (i + 1) +
-      ': ' +
-      formatDate(
-        date
-      ) +
-      '<br>';
-
-  }
-
-
-  document.getElementById(
-    'advanceSchedule'
-  ).innerHTML =
-    html;
-
 }
 
 
@@ -1511,7 +1071,7 @@ function calculateAdvance() {
  * SAVE COLLECTION
  ********************************************************/
 
-async function saveCollection() {
+function saveCollection() {
 
   if (!currentCustomer) {
 
@@ -1601,73 +1161,68 @@ async function saveCollection() {
     new Date();
 
 
-  const monthly =
-    type === 'Advance'
-      ? amount / months
-      : amount;
+  const pending =
+    getPending();
 
 
-  /*
-   * Regular:
-   *
-   * One collection.
-   */
+  /******************************************************
+   * REGULAR PAYMENT
+   ******************************************************/
 
   if (
     type === 'Regular'
   ) {
 
-    await dbPut(
-      PENDING_STORE,
-      {
+    pending.push({
 
-        transactionId:
-          createTransactionId(),
+      transactionId:
+        createTransactionId(),
 
-        transactionDate:
-          today.toISOString(),
+      transactionDate:
+        today.toISOString(),
 
-        coveredDate:
-          today.toISOString(),
+      coveredDate:
+        today.toISOString(),
 
-        crf:
-          currentCustomer.crf,
+      crf:
+        currentCustomer.crf,
 
-        amount:
-          Number(
-            amount.toFixed(2)
-          ),
+      amount:
+        amount,
 
-        paymentType:
-          'Regular',
+      paymentType:
+        'Regular',
 
-        agent:
-          getAgent(),
+      agent:
+        getAgent(),
 
-        remarks:
-          remarks
+      remarks:
+        remarks
 
-      }
-    );
+    });
 
   }
 
 
-  /*
-   * Advance:
+  /******************************************************
+   * ADVANCE PAYMENT
    *
-   * One entry for each month.
+   * Example:
    *
-   * First month:
-   * actual payment day.
+   * ₹2700
+   * 10 months
    *
-   * Remaining months:
-   * first day of month.
-   */
+   * Creates monthly entries.
+   *
+   ******************************************************/
 
   if (
     type === 'Advance'
   ) {
+
+    const monthly =
+      amount / months;
+
 
     for (
       let i = 0;
@@ -1676,93 +1231,72 @@ async function saveCollection() {
     ) {
 
       const coveredDate =
-        getAdvanceDate(
+        addMonths(
           today,
           i
         );
 
 
-      let entryAmount =
-        Number(
-          monthly.toFixed(2)
-        );
+      pending.push({
 
+        transactionId:
+          createTransactionId(),
 
-      /*
-       * Put any rounding difference
-       * into the final month.
-       */
+        transactionDate:
+          today.toISOString(),
 
-      if (
-        i === months - 1
-      ) {
+        coveredDate:
+          coveredDate.toISOString(),
 
-        entryAmount =
+        crf:
+          currentCustomer.crf,
+
+        amount:
           Number(
-            (
-              amount -
-              (
-                Number(
-                  monthly.toFixed(2)
-                ) *
-                (months - 1)
-              )
-            )
-            .toFixed(2)
-          );
+            monthly.toFixed(2)
+          ),
 
-      }
+        paymentType:
+          'Advance',
 
+        agent:
+          getAgent(),
 
-      await dbPut(
-        PENDING_STORE,
-        {
+        remarks:
+          remarks +
+          (
+            remarks
+              ? ' | '
+              : ''
+          ) +
+          'Advance month ' +
+          (i + 1) +
+          ' of ' +
+          months
 
-          transactionId:
-            createTransactionId(),
-
-          transactionDate:
-            today.toISOString(),
-
-          coveredDate:
-            coveredDate.toISOString(),
-
-          crf:
-            currentCustomer.crf,
-
-          amount:
-            entryAmount,
-
-          paymentType:
-            'Advance',
-
-          agent:
-            getAgent(),
-
-          remarks:
-            (
-              remarks
-                ? remarks + ' | '
-                : ''
-            ) +
-            'Advance month ' +
-            (i + 1) +
-            ' of ' +
-            months
-
-        }
-      );
+      });
 
     }
 
   }
 
 
-  /*
-   * Update local payment summary.
-   */
+  localStorage.setItem(
 
-  await updateLocalPaymentSummary(
+    PENDING_KEY,
+
+    JSON.stringify(
+      pending
+    )
+
+  );
+
+
+  /******************************************************
+   * UPDATE LOCAL PAYMENT SUMMARY
+   ******************************************************/
+
+  updateLocalPaymentSummary(
     currentCustomer.crf,
     today,
     amount,
@@ -1771,7 +1305,7 @@ async function saveCollection() {
   );
 
 
-  await updateCounts();
+  updateCounts();
 
 
   clearForm();
@@ -1807,13 +1341,17 @@ async function saveCollection() {
  * LOCAL PAYMENT SUMMARY
  ********************************************************/
 
-async function updateLocalPaymentSummary(
+function updateLocalPaymentSummary(
   crf,
   transactionDate,
   amount,
   type,
   months
 ) {
+
+  const payments =
+    getPayments();
+
 
   const key =
     String(
@@ -1824,16 +1362,11 @@ async function updateLocalPaymentSummary(
 
 
   const existing =
-    await dbGet(
-      PAYMENT_STORE,
-      key
-    );
+    payments[key];
 
 
   let paidThrough =
-    new Date(
-      transactionDate
-    );
+    transactionDate;
 
 
   if (
@@ -1841,7 +1374,7 @@ async function updateLocalPaymentSummary(
   ) {
 
     paidThrough =
-      getAdvanceDate(
+      addMonths(
         transactionDate,
         months - 1
       );
@@ -1873,26 +1406,31 @@ async function updateLocalPaymentSummary(
   }
 
 
-  await dbPut(
-    PAYMENT_STORE,
-    {
+  payments[key] = {
 
-      crf:
-        key,
+    lastPaymentDate:
+      transactionDate.toISOString(),
 
-      lastPaymentDate:
-        transactionDate.toISOString(),
+    lastPaymentAmount:
+      amount,
 
-      lastPaymentAmount:
-        amount,
+    lastPaymentType:
+      type,
 
-      lastPaymentType:
-        type,
+    paidThrough:
+      paidThrough.toISOString()
 
-      paidThrough:
-        paidThrough.toISOString()
+  };
 
-    }
+
+  localStorage.setItem(
+
+    PAYMENT_KEY,
+
+    JSON.stringify(
+      payments
+    )
+
   );
 
 
@@ -1906,7 +1444,7 @@ async function updateLocalPaymentSummary(
     === key
   ) {
 
-    await displayCustomer(
+    displayCustomer(
       currentCustomer
     );
 
@@ -1916,17 +1454,10 @@ async function updateLocalPaymentSummary(
 
 
 /********************************************************
- * SYNCHRONIZATION
+ * SYNC
  ********************************************************/
 
 async function syncNow() {
-
-  if (syncing) {
-
-    return;
-
-  }
-
 
   if (
     !navigator.onLine
@@ -1934,22 +1465,23 @@ async function syncNow() {
 
     updateConnectionStatus();
 
-    setSyncStatus(
-      'Offline. Waiting for internet connection.'
-    );
-
     return;
 
   }
 
 
   if (
-    API_URL ===
-    'PASTE_APPS_SCRIPT_EXEC_URL_HERE'
+    API_URL === 'MYCODE'
   ) {
 
-    setSyncStatus(
-      'Apps Script URL is not configured yet.'
+    showMessage(
+
+      'saveMessage',
+
+      'Apps Script URL has not been configured yet.',
+
+      false
+
     );
 
     return;
@@ -1957,32 +1489,11 @@ async function syncNow() {
   }
 
 
-  syncing = true;
-
-
-  const button =
-    document.getElementById(
-      'syncButton'
-    );
-
-
-  button.classList.add(
-    'syncing'
-  );
-
-
-  setSyncStatus(
-    'Synchronizing...'
-  );
+  const pending =
+    getPending();
 
 
   try {
-
-    const pending =
-      await dbGetAll(
-        PENDING_STORE
-      );
-
 
     const response =
       await fetch(
@@ -2052,36 +1563,52 @@ async function syncNow() {
     }
 
 
-    /*
-     * Delete only transactions
-     * confirmed by server.
-     */
+    /****************************************************
+     * REMOVE SUCCESSFULLY SYNCED TRANSACTIONS
+     ****************************************************/
 
     const syncedIds =
-      Array.isArray(
-        result.syncedIds
-      )
-        ? result.syncedIds
-        : [];
+      new Set(
 
+        Array.isArray(
+          result.syncedIds
+        )
 
-    for (
-      let i = 0;
-      i < syncedIds.length;
-      i++
-    ) {
+          ? result.syncedIds
 
-      await dbDelete(
-        PENDING_STORE,
-        syncedIds[i]
+          : []
+
       );
 
-    }
+
+    const remaining =
+      pending.filter(
+
+        function(item) {
+
+          return !syncedIds.has(
+            item.transactionId
+          );
+
+        }
+
+      );
 
 
-    /*
-     * Store fresh customer data.
-     */
+    localStorage.setItem(
+
+      PENDING_KEY,
+
+      JSON.stringify(
+        remaining
+      )
+
+    );
+
+
+    /****************************************************
+     * UPDATE CUSTOMERS
+     ****************************************************/
 
     if (
       Array.isArray(
@@ -2089,68 +1616,74 @@ async function syncNow() {
       )
     ) {
 
-      await saveCustomers(
-        result.customers
+      localStorage.setItem(
+
+        CUSTOMER_KEY,
+
+        JSON.stringify(
+          result.customers
+        )
+
       );
 
     }
 
 
-    /*
-     * Store fresh payment summary.
-     */
+    /****************************************************
+     * UPDATE PAYMENT SUMMARY
+     ****************************************************/
 
     if (
       result.payments
     ) {
 
-      const keys =
-        Object.keys(
+      localStorage.setItem(
+
+        PAYMENT_KEY,
+
+        JSON.stringify(
           result.payments
-        );
+        )
 
-
-      for (
-        let i = 0;
-        i < keys.length;
-        i++
-      ) {
-
-        const key =
-          keys[i];
-
-
-        await dbPut(
-          PAYMENT_STORE,
-          {
-
-            crf:
-              key,
-
-            ...result.payments[key]
-
-          }
-        );
-
-      }
+      );
 
     }
 
 
-    await updateCounts();
+    updateCounts();
 
 
-    /*
-     * Refresh current customer.
-     */
+    /****************************************************
+     * REFRESH CURRENT CUSTOMER
+     ****************************************************/
 
     if (
       currentCustomer
     ) {
 
+      const customers =
+        getCustomers();
+
+
       const updated =
-        await findLocalCustomer(
-          currentCustomer.crf
+        customers.find(
+
+          function(item) {
+
+            return String(
+              item.crf
+            )
+            .trim()
+            .toUpperCase()
+            ===
+            String(
+              currentCustomer.crf
+            )
+            .trim()
+            .toUpperCase();
+
+          }
+
         );
 
 
@@ -2161,7 +1694,7 @@ async function syncNow() {
         currentCustomer =
           updated;
 
-        await displayCustomer(
+        displayCustomer(
           updated
         );
 
@@ -2170,29 +1703,20 @@ async function syncNow() {
     }
 
 
-    const remaining =
-      await dbGetAll(
-        PENDING_STORE
-      );
+    showMessage(
 
+      'saveMessage',
 
-    if (
       remaining.length === 0
-    ) {
 
-      setSyncStatus(
-        '✅ Sync successful. All collections are synchronized.'
-      );
+        ? 'Sync successful. All collections are synchronized.'
 
-    } else {
+        : remaining.length +
+          ' collection(s) still pending.',
 
-      setSyncStatus(
-        '⚠️ ' +
-        remaining.length +
-        ' collection(s) still pending.'
-      );
+      true
 
-    }
+    );
 
 
   } catch (error) {
@@ -2203,19 +1727,22 @@ async function syncNow() {
     );
 
 
-    await updateCounts();
+    /*
+     * NEVER delete pending collections
+     * when sync fails.
+     */
+
+    updateCounts();
 
 
-    setSyncStatus(
-      '❌ Sync failed. Pending collections are safely stored on this phone.'
-    );
+    showMessage(
 
-  } finally {
+      'saveMessage',
 
-    syncing = false;
+      'Sync failed. Your collections remain safely stored on this phone.',
 
-    button.classList.remove(
-      'syncing'
+      false
+
     );
 
   }
@@ -2224,16 +1751,37 @@ async function syncNow() {
 
 
 /********************************************************
- * AGENT
+ * GET AGENT
  ********************************************************/
 
 function getAgent() {
 
+  try {
+
+    const agent =
+      JSON.parse(
+
+        localStorage.getItem(
+          AGENT_KEY
+        ) || 'null'
+
+      );
+
+
+    if (
+      agent &&
+      agent.agentId
+    ) {
+
+      return agent.agentId;
+
+    }
+
+  } catch (error) {}
+
+
   /*
-   * For now this is AG001.
-   *
-   * Later we can add an Agent Login screen
-   * and store the agent securely.
+   * Current agent.
    */
 
   return 'AG001';
@@ -2268,6 +1816,59 @@ function createTransactionId() {
 /********************************************************
  * DATE FUNCTIONS
  ********************************************************/
+
+function addMonths(
+  date,
+  months
+) {
+
+  const result =
+    new Date(
+      date
+    );
+
+
+  const day =
+    result.getDate();
+
+
+  result.setDate(
+    1
+  );
+
+
+  result.setMonth(
+    result.getMonth() +
+    months
+  );
+
+
+  const lastDay =
+    new Date(
+
+      result.getFullYear(),
+
+      result.getMonth() + 1,
+
+      0
+
+    ).getDate();
+
+
+  result.setDate(
+
+    Math.min(
+      day,
+      lastDay
+    )
+
+  );
+
+
+  return result;
+
+}
+
 
 function formatDate(
   date
@@ -2449,19 +2050,6 @@ function hideMessage(
 }
 
 
-function setSyncStatus(
-  message
-) {
-
-  document.getElementById(
-    'syncStatus'
-  )
-  .innerText =
-    message;
-
-}
-
-
 /********************************************************
  * SERVICE WORKER
  ********************************************************/
@@ -2475,32 +2063,27 @@ function registerServiceWorker() {
 
     navigator.serviceWorker
       .register(
-        './service-worker.js'
-      )
-      .then(
-        function() {
-
-          console.log(
-            'Service worker registered.'
-          );
-
-        }
+        'service-worker.js'
       )
       .catch(
+
         function(error) {
 
           console.log(
+
             'Service worker registration failed:',
+
             error
+
           );
 
         }
+
       );
 
   }
 
 }
-
 
 </script>
 
