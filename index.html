@@ -111,11 +111,6 @@
       color: white;
     }
 
-    .sync {
-      background: #7c3aed;
-      color: white;
-    }
-
     .info {
       background: #f0fdf4;
       padding: 12px;
@@ -225,16 +220,6 @@
       </strong>
 
     </div>
-
-
-    <button
-      class="sync"
-      onclick="syncNow()"
-    >
-
-      🔄 Sync Now
-
-    </button>
 
   </div>
 
@@ -556,7 +541,36 @@
  ********************************************************/
 
 const API_URL =
-  'https://script.google.com/macros/s/AKfycbwLLhoQmLtoMPQBpvraumj5nNGqtZGFLo9VbTC077SxH5AKWpow5aOaLUDMpdA7dlXJQQ/exec';
+  'https://script.google.com/macros/s/AKfycbwLLhoQmLtoMPQBpvraumj5nNGqtZGFLo9VbTC077SxH5AKWpow5aOaLUDMpdA7dlXJQQ/exec;
+
+
+/********************************************************
+ * AUTOMATIC SYNC SETTINGS
+ ********************************************************/
+
+/*
+ * Sync every 5 seconds.
+ *
+ * You can change this to:
+ *
+ * 3000 = every 3 seconds
+ * 2000 = every 2 seconds
+ * 1000 = every 1 second
+ *
+ * 5000 is recommended to avoid unnecessary requests.
+ */
+
+const AUTO_SYNC_INTERVAL =
+  5000;
+
+
+/*
+ * Prevent multiple sync requests from running
+ * at the same time.
+ */
+
+let syncInProgress =
+  false;
 
 
 /********************************************************
@@ -598,11 +612,43 @@ window.addEventListener(
     registerServiceWorker();
 
 
-    if (navigator.onLine) {
+    /*
+     * Perform one sync immediately when
+     * the application opens.
+     */
+
+    if (
+      navigator.onLine
+    ) {
 
       syncNow();
 
     }
+
+
+    /*
+     * AUTOMATIC SYNC
+     *
+     * This runs every 5 seconds.
+     */
+
+    setInterval(
+
+      function() {
+
+        if (
+          navigator.onLine
+        ) {
+
+          syncNow();
+
+        }
+
+      },
+
+      AUTO_SYNC_INTERVAL
+
+    );
 
   }
 );
@@ -617,6 +663,11 @@ window.addEventListener(
   function() {
 
     updateConnectionStatus();
+
+    /*
+     * Internet has returned.
+     * Sync immediately instead of waiting 5 seconds.
+     */
 
     syncNow();
 
@@ -634,6 +685,10 @@ window.addEventListener(
 );
 
 
+/********************************************************
+ * CONNECTION STATUS
+ ********************************************************/
+
 function updateConnectionStatus() {
 
   const element =
@@ -642,10 +697,12 @@ function updateConnectionStatus() {
     );
 
 
-  if (navigator.onLine) {
+  if (
+    navigator.onLine
+  ) {
 
     element.innerText =
-      '🟢 Online';
+      '🟢 Online • Auto Sync ON';
 
     element.className =
       'online';
@@ -653,7 +710,7 @@ function updateConnectionStatus() {
   } else {
 
     element.innerText =
-      '🔴 Offline';
+      '🔴 Offline • Collections saved locally';
 
     element.className =
       'offline';
@@ -761,7 +818,9 @@ function searchCustomer() {
     .toUpperCase();
 
 
-  if (!crf) {
+  if (
+    !crf
+  ) {
 
     showMessage(
       'searchMessage',
@@ -793,7 +852,9 @@ function searchCustomer() {
     );
 
 
-  if (!customer) {
+  if (
+    !customer
+  ) {
 
     document.getElementById(
       'customerCard'
@@ -803,7 +864,7 @@ function searchCustomer() {
 
     showMessage(
       'searchMessage',
-      'Customer not found on this phone. Please sync while internet is available.',
+      'Customer not found on this phone. Please wait for automatic synchronization.',
       false
     );
 
@@ -832,7 +893,9 @@ function searchCustomer() {
  * DISPLAY CUSTOMER
  ********************************************************/
 
-function displayCustomer(customer) {
+function displayCustomer(
+  customer
+) {
 
   document.getElementById(
     'customerCard'
@@ -890,7 +953,9 @@ function displayCustomer(customer) {
     ];
 
 
-  if (payment) {
+  if (
+    payment
+  ) {
 
     document.getElementById(
       'lastPaidDate'
@@ -974,7 +1039,9 @@ function paymentTypeChanged() {
     );
 
 
-  if (type === 'Advance') {
+  if (
+    type === 'Advance'
+  ) {
 
     box.classList.remove(
       'hidden'
@@ -1035,20 +1102,27 @@ function calculateAdvance() {
   document.getElementById(
     'advanceStartDate'
   ).innerText =
-    formatDate(today);
+    formatDate(
+      today
+    );
 
 
   document.getElementById(
     'advanceEndDate'
   ).innerText =
     formatDate(
+
       addMonths(
+
         today,
+
         Math.max(
           months - 1,
           0
         )
+
       )
+
     );
 
 
@@ -1066,7 +1140,9 @@ function calculateAdvance() {
 
 function saveCollection() {
 
-  if (!currentCustomer) {
+  if (
+    !currentCustomer
+  ) {
 
     showMessage(
       'saveMessage',
@@ -1109,7 +1185,8 @@ function saveCollection() {
     ).value;
 
 
-  let months = 1;
+  let months =
+    1;
 
 
   if (
@@ -1282,11 +1359,17 @@ function saveCollection() {
    ******************************************************/
 
   updateLocalPaymentSummary(
+
     currentCustomer.crf,
+
     today,
+
     amount,
+
     type,
+
     months
+
   );
 
 
@@ -1304,12 +1387,19 @@ function saveCollection() {
 
       ? 'Collection saved. Synchronizing...'
 
-      : 'Collection saved offline. It will synchronize when internet returns.',
+      : 'Collection saved offline. It will synchronize automatically when internet returns.',
 
     true
 
   );
 
+
+  /*
+   * Try immediately.
+   *
+   * The 5-second automatic timer will continue
+   * working even if this attempt fails.
+   */
 
   if (
     navigator.onLine
@@ -1439,10 +1529,14 @@ function updateLocalPaymentSummary(
 
 
 /********************************************************
- * SYNC
+ * AUTOMATIC SYNC
  ********************************************************/
 
 async function syncNow() {
+
+  /*
+   * Don't sync when offline.
+   */
 
   if (
     !navigator.onLine
@@ -1455,18 +1549,34 @@ async function syncNow() {
   }
 
 
+  /*
+   * IMPORTANT:
+   *
+   * If the previous sync is still running,
+   * don't start another request.
+   */
+
   if (
+    syncInProgress
+  ) {
+
+    return;
+
+  }
+
+
+  /*
+   * Make sure API URL exists.
+   */
+
+  if (
+    !API_URL ||
+    API_URL === 'API should come here' ||
     API_URL === 'MYCODE'
   ) {
 
-    showMessage(
-
-      'saveMessage',
-
-      'Apps Script URL has not been configured yet.',
-
-      false
-
+    console.error(
+      'Apps Script URL has not been configured.'
     );
 
     return;
@@ -1478,11 +1588,21 @@ async function syncNow() {
     getPending();
 
 
+  /*
+   * Lock the sync process.
+   */
+
+  syncInProgress =
+    true;
+
+
   try {
 
     const response =
       await fetch(
+
         API_URL,
+
         {
 
           method:
@@ -1510,6 +1630,7 @@ async function syncNow() {
             })
 
         }
+
       );
 
 
@@ -1688,47 +1809,58 @@ async function syncNow() {
     }
 
 
-    showMessage(
+    /*
+     * Only show the synchronization message
+     * if there were pending collections.
+     */
 
-      'saveMessage',
+    if (
+      pending.length > 0
+    ) {
 
-      remaining.length === 0
+      showMessage(
 
-        ? 'Sync successful. All collections are synchronized.'
+        'saveMessage',
 
-        : remaining.length +
-          ' collection(s) still pending.',
+        remaining.length === 0
 
-      true
+          ? 'All collections synchronized.'
 
-    );
+          : remaining.length +
+            ' collection(s) still pending.',
+
+        true
+
+      );
+
+    }
 
 
   } catch (error) {
 
     console.error(
-      'Sync error:',
+      'Automatic sync error:',
       error
     );
 
 
     /*
      * NEVER delete pending collections
-     * when sync fails.
+     * if synchronization fails.
      */
 
     updateCounts();
 
 
-    showMessage(
+  } finally {
 
-      'saveMessage',
+    /*
+     * Always release the lock,
+     * even if synchronization fails.
+     */
 
-      'Sync failed. Your collections remain safely stored on this phone.',
-
-      false
-
-    );
+    syncInProgress =
+      false;
 
   }
 
@@ -1939,7 +2071,9 @@ function formatDisplayDate(
   value
 ) {
 
-  if (!value) {
+  if (
+    !value
+  ) {
 
     return '';
 
