@@ -169,11 +169,6 @@
       margin-top: 10px;
     }
 
-    .syncing {
-      opacity: .6;
-      pointer-events: none;
-    }
-
   </style>
 
 </head>
@@ -537,11 +532,13 @@
 /********************************************************
  * GOOGLE APPS SCRIPT URL
  *
- * Replace this with your actual Apps Script Web App URL.
+ * IMPORTANT:
+ * Replace the value below with your actual
+ * Google Apps Script Web App URL.
  ********************************************************/
 
 const API_URL =
-  'https://script.google.com/macros/s/AKfycbwLLhoQmLtoMPQBpvraumj5nNGqtZGFLo9VbTC077SxH5AKWpow5aOaLUDMpdA7dlXJQQ/exec;
+  'https://script.google.com/macros/s/AKfycbwLLhoQmLtoMPQBpvraumj5nNGqtZGFLo9VbTC077SxH5AKWpow5aOaLUDMpdA7dlXJQQ/exec';
 
 
 /********************************************************
@@ -549,15 +546,9 @@ const API_URL =
  ********************************************************/
 
 /*
- * Sync every 5 seconds.
+ * Automatic synchronization interval.
  *
- * You can change this to:
- *
- * 3000 = every 3 seconds
- * 2000 = every 2 seconds
- * 1000 = every 1 second
- *
- * 5000 is recommended to avoid unnecessary requests.
+ * 5000 = 5 seconds
  */
 
 const AUTO_SYNC_INTERVAL =
@@ -565,8 +556,8 @@ const AUTO_SYNC_INTERVAL =
 
 
 /*
- * Prevent multiple sync requests from running
- * at the same time.
+ * Prevent multiple synchronization requests
+ * from running at the same time.
  */
 
 let syncInProgress =
@@ -598,60 +589,82 @@ let currentCustomer =
 
 
 /********************************************************
- * START
+ * APPLICATION START
  ********************************************************/
 
-window.addEventListener(
-  'load',
-  function() {
+function startApplication() {
 
-    updateConnectionStatus();
-
-    updateCounts();
-
-    registerServiceWorker();
+  console.log(
+    'Daily Collection application started'
+  );
 
 
-    /*
-     * Perform one sync immediately when
-     * the application opens.
-     */
+  /*
+   * Update connection status immediately.
+   */
 
-    if (
-      navigator.onLine
-    ) {
-
-      syncNow();
-
-    }
+  updateConnectionStatus();
 
 
-    /*
-     * AUTOMATIC SYNC
-     *
-     * This runs every 5 seconds.
-     */
+  /*
+   * Update local counts.
+   */
 
-    setInterval(
+  updateCounts();
 
-      function() {
 
-        if (
-          navigator.onLine
-        ) {
+  /*
+   * Register service worker.
+   */
 
-          syncNow();
+  registerServiceWorker();
 
-        }
 
-      },
+  /*
+   * Synchronize immediately if online.
+   */
 
-      AUTO_SYNC_INTERVAL
+  if (
+    navigator.onLine
+  ) {
 
-    );
+    syncNow();
 
   }
-);
+
+
+  /*
+   * AUTOMATIC SYNC EVERY 5 SECONDS.
+   */
+
+  setInterval(
+
+    function() {
+
+      if (
+        navigator.onLine
+      ) {
+
+        syncNow();
+
+      }
+
+    },
+
+    AUTO_SYNC_INTERVAL
+
+  );
+
+}
+
+
+/*
+ * Start application.
+ *
+ * This is deliberately outside the window load event.
+ */
+
+startApplication();
 
 
 /********************************************************
@@ -664,9 +677,10 @@ window.addEventListener(
 
     updateConnectionStatus();
 
+
     /*
-     * Internet has returned.
-     * Sync immediately instead of waiting 5 seconds.
+     * Internet returned.
+     * Synchronize immediately.
      */
 
     syncNow();
@@ -697,6 +711,13 @@ function updateConnectionStatus() {
     );
 
 
+  if (!element) {
+
+    return;
+
+  }
+
+
   if (
     navigator.onLine
   ) {
@@ -710,7 +731,7 @@ function updateConnectionStatus() {
   } else {
 
     element.innerText =
-      '🔴 Offline • Collections saved locally';
+      '🔴 Offline • Saved on phone';
 
     element.className =
       'offline';
@@ -738,6 +759,11 @@ function getCustomers() {
 
   } catch (error) {
 
+    console.error(
+      'Customer storage error:',
+      error
+    );
+
     return [];
 
   }
@@ -758,6 +784,11 @@ function getPayments() {
     );
 
   } catch (error) {
+
+    console.error(
+      'Payment storage error:',
+      error
+    );
 
     return {};
 
@@ -780,6 +811,11 @@ function getPending() {
 
   } catch (error) {
 
+    console.error(
+      'Pending storage error:',
+      error
+    );
+
     return [];
 
   }
@@ -789,16 +825,32 @@ function getPending() {
 
 function updateCounts() {
 
-  document.getElementById(
-    'customerCount'
-  ).innerText =
-    getCustomers().length;
+  const customerCount =
+    document.getElementById(
+      'customerCount'
+    );
 
 
-  document.getElementById(
-    'pendingCount'
-  ).innerText =
-    getPending().length;
+  const pendingCount =
+    document.getElementById(
+      'pendingCount'
+    );
+
+
+  if (customerCount) {
+
+    customerCount.innerText =
+      getCustomers().length;
+
+  }
+
+
+  if (pendingCount) {
+
+    pendingCount.innerText =
+      getPending().length;
+
+  }
 
 }
 
@@ -818,9 +870,7 @@ function searchCustomer() {
     .toUpperCase();
 
 
-  if (
-    !crf
-  ) {
+  if (!crf) {
 
     showMessage(
       'searchMessage',
@@ -852,9 +902,7 @@ function searchCustomer() {
     );
 
 
-  if (
-    !customer
-  ) {
+  if (!customer) {
 
     document.getElementById(
       'customerCard'
@@ -864,7 +912,7 @@ function searchCustomer() {
 
     showMessage(
       'searchMessage',
-      'Customer not found on this phone. Please wait for automatic synchronization.',
+      'Customer not found on this phone. Automatic synchronization will update customer data when available.',
       false
     );
 
@@ -953,9 +1001,7 @@ function displayCustomer(
     ];
 
 
-  if (
-    payment
-  ) {
+  if (payment) {
 
     document.getElementById(
       'lastPaidDate'
@@ -1140,9 +1186,7 @@ function calculateAdvance() {
 
 function saveCollection() {
 
-  if (
-    !currentCustomer
-  ) {
+  if (!currentCustomer) {
 
     showMessage(
       'saveMessage',
@@ -1385,7 +1429,7 @@ function saveCollection() {
 
     navigator.onLine
 
-      ? 'Collection saved. Synchronizing...'
+      ? 'Collection saved. Automatic synchronization started.'
 
       : 'Collection saved offline. It will synchronize automatically when internet returns.',
 
@@ -1395,10 +1439,7 @@ function saveCollection() {
 
 
   /*
-   * Try immediately.
-   *
-   * The 5-second automatic timer will continue
-   * working even if this attempt fails.
+   * Attempt immediate synchronization.
    */
 
   if (
@@ -1529,13 +1570,13 @@ function updateLocalPaymentSummary(
 
 
 /********************************************************
- * AUTOMATIC SYNC
+ * AUTOMATIC SYNCHRONIZATION
  ********************************************************/
 
 async function syncNow() {
 
   /*
-   * Don't sync when offline.
+   * Do nothing when offline.
    */
 
   if (
@@ -1550,10 +1591,8 @@ async function syncNow() {
 
 
   /*
-   * IMPORTANT:
-   *
-   * If the previous sync is still running,
-   * don't start another request.
+   * Don't start another request if one
+   * is already running.
    */
 
   if (
@@ -1566,7 +1605,7 @@ async function syncNow() {
 
 
   /*
-   * Make sure API URL exists.
+   * Check API URL.
    */
 
   if (
@@ -1576,7 +1615,7 @@ async function syncNow() {
   ) {
 
     console.error(
-      'Apps Script URL has not been configured.'
+      'Google Apps Script API URL has not been configured.'
     );
 
     return;
@@ -1584,12 +1623,16 @@ async function syncNow() {
   }
 
 
+  /*
+   * Get pending collections.
+   */
+
   const pending =
     getPending();
 
 
   /*
-   * Lock the sync process.
+   * Lock synchronization.
    */
 
   syncInProgress =
@@ -1597,6 +1640,12 @@ async function syncNow() {
 
 
   try {
+
+    console.log(
+      'Automatic sync started:',
+      new Date().toLocaleTimeString()
+    );
+
 
     const response =
       await fetch(
@@ -1810,8 +1859,8 @@ async function syncNow() {
 
 
     /*
-     * Only show the synchronization message
-     * if there were pending collections.
+     * Show synchronization message only
+     * when there were pending collections.
      */
 
     if (
@@ -1836,6 +1885,12 @@ async function syncNow() {
     }
 
 
+    console.log(
+      'Automatic sync completed:',
+      new Date().toLocaleTimeString()
+    );
+
+
   } catch (error) {
 
     console.error(
@@ -1845,18 +1900,16 @@ async function syncNow() {
 
 
     /*
-     * NEVER delete pending collections
-     * if synchronization fails.
+     * NEVER remove pending collections
+     * when synchronization fails.
      */
 
     updateCounts();
 
-
   } finally {
 
     /*
-     * Always release the lock,
-     * even if synchronization fails.
+     * Release the synchronization lock.
      */
 
     syncInProgress =
@@ -1894,7 +1947,14 @@ function getAgent() {
 
     }
 
-  } catch (error) {}
+  } catch (error) {
+
+    console.error(
+      'Agent storage error:',
+      error
+    );
+
+  }
 
 
   return 'AG001';
@@ -1985,11 +2045,6 @@ function addMonths(
 
 /********************************************************
  * DATE DISPLAY
- *
- * OUTPUT:
- *
- * 29 AUGUST 2026
- *
  ********************************************************/
 
 function formatDate(
@@ -2164,6 +2219,13 @@ function showMessage(
     );
 
 
+  if (!element) {
+
+    return;
+
+  }
+
+
   element.className =
     'message ' +
     (
@@ -2187,6 +2249,13 @@ function hideMessage(
     document.getElementById(
       id
     );
+
+
+  if (!element) {
+
+    return;
+
+  }
 
 
   element.className =
@@ -2213,6 +2282,15 @@ function registerServiceWorker() {
     navigator.serviceWorker
       .register(
         'service-worker.js'
+      )
+      .then(
+        function() {
+
+          console.log(
+            'Service worker registered.'
+          );
+
+        }
       )
       .catch(
 
