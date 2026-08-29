@@ -1,9 +1,2510 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <meta
+    name="theme-color"
+    content="#166534"
+  >
+
+  <meta
+    name="description"
+    content="Daily Collection Management"
+  >
+
+  <link
+    rel="manifest"
+    href="./manifest.json"
+  >
+
   <title>Daily Collection</title>
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f3f4f6;
+      color: #111827;
+    }
+
+    .header {
+      background: #166534;
+      color: white;
+      padding: 18px;
+      text-align: center;
+    }
+
+    .header h2 {
+      margin: 0 0 8px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+      padding: 15px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin: 12px 0 6px;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 13px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 12px;
+      border: 0;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:active {
+      transform: scale(.99);
+    }
+
+    .search {
+      background: #2563eb;
+      color: white;
+    }
+
+    .save {
+      background: #16a34a;
+      color: white;
+    }
+
+    .sync {
+      background: #7c3aed;
+      color: white;
+    }
+
+    .info {
+      background: #f0fdf4;
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 12px;
+    }
+
+    .info-row {
+      padding: 7px 0;
+    }
+
+    .label {
+      font-weight: bold;
+    }
+
+    .online {
+      color: #bbf7d0;
+    }
+
+    .offline {
+      color: #fecaca;
+    }
+
+    .message {
+      display: none;
+      padding: 12px;
+      margin-top: 10px;
+      border-radius: 8px;
+    }
+
+    .success {
+      display: block;
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .error {
+      display: block;
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .customer {
+      display: none;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .pending {
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+
+    .status-box {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      background: #eff6ff;
+      color: #1e40af;
+      font-size: 14px;
+    }
+
+    .danger {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .syncing {
+      opacity: .6;
+      pointer-events: none;
+    }
+
+    .small {
+      font-size: 13px;
+      color: #6b7280;
+    }
+
+  </style>
+
 </head>
+
+
 <body>
-  <h1>Daily Collection</h1>
+
+
+<header class="header">
+
+  <h2>
+    Daily Collection
+  </h2>
+
+  <div id="connectionStatus">
+    Checking connection...
+  </div>
+
+</header>
+
+
+<main class="container">
+
+
+  <!-- STATUS -->
+
+  <div class="card">
+
+    <strong>
+      Customers on phone:
+    </strong>
+
+    <span id="customerCount">
+      0
+    </span>
+
+
+    <div class="pending">
+
+      Pending collections:
+
+      <strong id="pendingCount">
+        0
+      </strong>
+
+    </div>
+
+
+    <button
+      id="syncButton"
+      class="sync"
+      onclick="syncNow()"
+    >
+      🔄 Sync Now
+    </button>
+
+
+    <div
+      id="syncStatus"
+      class="status-box"
+    >
+      Waiting...
+    </div>
+
+  </div>
+
+
+  <!-- SEARCH -->
+
+  <div class="card">
+
+    <label>
+      CRF Number
+    </label>
+
+
+    <input
+      id="crfSearch"
+      type="text"
+      placeholder="Enter CRF number"
+      autocomplete="off"
+    >
+
+
+    <button
+      class="search"
+      onclick="searchCustomer()"
+    >
+
+      🔍 Search Customer
+
+    </button>
+
+
+    <div
+      id="searchMessage"
+      class="message"
+    ></div>
+
+  </div>
+
+
+  <!-- CUSTOMER -->
+
+  <div
+    id="customerCard"
+    class="card customer"
+  >
+
+
+    <h3 id="customerName"></h3>
+
+
+    <div class="info">
+
+
+      <div class="info-row">
+
+        <span class="label">
+          Customer ID:
+        </span>
+
+        <span id="customerId"></span>
+
+      </div>
+
+
+      <div class="info-row">
+
+        <span class="label">
+          CRF:
+        </span>
+
+        <span id="customerCRF"></span>
+
+      </div>
+
+
+      <div class="info-row">
+
+        <span class="label">
+          Address:
+        </span>
+
+        <span id="customerAddress"></span>
+
+      </div>
+
+
+      <div class="info-row">
+
+        <span class="label">
+          Phone:
+        </span>
+
+        <span id="customerPhone"></span>
+
+      </div>
+
+
+      <div class="info-row">
+
+        <span class="label">
+          Area:
+        </span>
+
+        <span id="customerArea"></span>
+
+      </div>
+
+
+      <div class="info-row">
+
+        <span class="label">
+          Last Paid Date:
+        </span>
+
+        <span id="lastPaidDate">
+          No previous payment
+        </span>
+
+      </div>
+
+
+      <div class="info-row">
+
+        <span class="label">
+          Paid Through:
+        </span>
+
+        <span id="paidThrough">
+          -
+        </span>
+
+      </div>
+
+
+      <div class="info-row">
+
+        <span class="label">
+          Last Amount:
+        </span>
+
+        ₹<span id="lastAmount">
+          0
+        </span>
+
+      </div>
+
+
+      <div class="info-row">
+
+        <span class="label">
+          Last Payment Type:
+        </span>
+
+        <span id="lastPaymentType">
+          -
+        </span>
+
+      </div>
+
+
+    </div>
+
+
+    <!-- COLLECTION -->
+
+    <h3>
+      Enter Collection
+    </h3>
+
+
+    <label>
+      Amount
+    </label>
+
+
+    <input
+      id="amount"
+      type="number"
+      min="1"
+      step="0.01"
+      placeholder="Enter amount"
+      oninput="calculateAdvance()"
+    >
+
+
+    <label>
+      Payment Type
+    </label>
+
+
+    <select
+      id="paymentType"
+      onchange="paymentTypeChanged()"
+    >
+
+      <option value="Regular">
+        Regular
+      </option>
+
+      <option value="Advance">
+        Advance
+      </option>
+
+    </select>
+
+
+    <div
+      id="advanceBox"
+      class="hidden"
+    >
+
+
+      <label>
+        Number of Months
+      </label>
+
+
+      <input
+        id="months"
+        type="number"
+        min="1"
+        value="1"
+        oninput="calculateAdvance()"
+      >
+
+
+      <div class="info">
+
+        Monthly Amount:
+
+        ₹<strong id="monthlyAmount">
+          0
+        </strong>
+
+
+        <br><br>
+
+
+        Starting Date:
+
+        <strong id="advanceStartDate">
+          -
+        </strong>
+
+
+        <br><br>
+
+
+        Ending Date:
+
+        <strong id="advanceEndDate">
+          -
+        </strong>
+
+
+        <br><br>
+
+
+        Entries to be created:
+
+        <strong id="advanceEntryCount">
+          0
+        </strong>
+
+
+        <br><br>
+
+
+        <strong>
+          Advance schedule
+        </strong>
+
+
+        <div
+          id="advanceSchedule"
+          class="small"
+          style="margin-top:8px;"
+        >
+        </div>
+
+      </div>
+
+
+    </div>
+
+
+    <label>
+      Remarks
+    </label>
+
+
+    <textarea
+      id="remarks"
+      placeholder="Optional"
+    ></textarea>
+
+
+    <button
+      class="save"
+      onclick="saveCollection()"
+    >
+
+      💰 Save Collection
+
+    </button>
+
+
+    <div
+      id="saveMessage"
+      class="message"
+    ></div>
+
+
+  </div>
+
+
+</main>
+
+
+<script>
+
+
+/********************************************************
+ * APPS SCRIPT API
+ *
+ * WE WILL PUT THE REAL URL HERE LATER.
+ ********************************************************/
+
+const API_URL = 'PASTE_APPS_SCRIPT_EXEC_URL_HERE';
+
+
+/********************************************************
+ * DATABASE
+ ********************************************************/
+
+const DB_NAME =
+  'DailyCollectionDB';
+
+const DB_VERSION =
+  1;
+
+const CUSTOMER_STORE =
+  'customers';
+
+const PAYMENT_STORE =
+  'payments';
+
+const PENDING_STORE =
+  'pending';
+
+
+let db = null;
+
+let currentCustomer = null;
+
+let syncing = false;
+
+
+/********************************************************
+ * START APPLICATION
+ ********************************************************/
+
+window.addEventListener(
+  'load',
+  async function() {
+
+    updateConnectionStatus();
+
+    await openDatabase();
+
+    await updateCounts();
+
+    registerServiceWorker();
+
+    /*
+     * If internet exists,
+     * try synchronization.
+     */
+
+    if (navigator.onLine) {
+
+      syncNow();
+
+    }
+
+  }
+);
+
+
+/********************************************************
+ * ONLINE / OFFLINE
+ ********************************************************/
+
+window.addEventListener(
+  'online',
+  function() {
+
+    updateConnectionStatus();
+
+    syncNow();
+
+  }
+);
+
+
+window.addEventListener(
+  'offline',
+  function() {
+
+    updateConnectionStatus();
+
+    setSyncStatus(
+      'Offline. Collections will be stored on this phone.'
+    );
+
+  }
+);
+
+
+function updateConnectionStatus() {
+
+  const element =
+    document.getElementById(
+      'connectionStatus'
+    );
+
+
+  if (navigator.onLine) {
+
+    element.innerText =
+      '🟢 Online';
+
+    element.className =
+      'online';
+
+  } else {
+
+    element.innerText =
+      '🔴 Offline';
+
+    element.className =
+      'offline';
+
+  }
+
+}
+
+
+/********************************************************
+ * INDEXED DB
+ ********************************************************/
+
+function openDatabase() {
+
+  return new Promise(
+    function(resolve, reject) {
+
+      const request =
+        indexedDB.open(
+          DB_NAME,
+          DB_VERSION
+        );
+
+
+      request.onupgradeneeded =
+        function(event) {
+
+          const database =
+            event.target.result;
+
+
+          if (
+            !database.objectStoreNames.contains(
+              CUSTOMER_STORE
+            )
+          ) {
+
+            database.createObjectStore(
+              CUSTOMER_STORE,
+              {
+                keyPath: 'crf'
+              }
+            );
+
+          }
+
+
+          if (
+            !database.objectStoreNames.contains(
+              PAYMENT_STORE
+            )
+          ) {
+
+            database.createObjectStore(
+              PAYMENT_STORE,
+              {
+                keyPath: 'crf'
+              }
+            );
+
+          }
+
+
+          if (
+            !database.objectStoreNames.contains(
+              PENDING_STORE
+            )
+          ) {
+
+            database.createObjectStore(
+              PENDING_STORE,
+              {
+                keyPath: 'transactionId'
+              }
+            );
+
+          }
+
+        };
+
+
+      request.onsuccess =
+        function(event) {
+
+          db =
+            event.target.result;
+
+          resolve(db);
+
+        };
+
+
+      request.onerror =
+        function() {
+
+          reject(
+            request.error
+          );
+
+        };
+
+    }
+  );
+
+}
+
+
+/********************************************************
+ * DB HELPERS
+ ********************************************************/
+
+function dbPut(
+  storeName,
+  value
+) {
+
+  return new Promise(
+    function(resolve, reject) {
+
+      const transaction =
+        db.transaction(
+          storeName,
+          'readwrite'
+        );
+
+
+      const store =
+        transaction.objectStore(
+          storeName
+        );
+
+
+      const request =
+        store.put(
+          value
+        );
+
+
+      request.onsuccess =
+        function() {
+
+          resolve();
+
+        };
+
+
+      request.onerror =
+        function() {
+
+          reject(
+            request.error
+          );
+
+        };
+
+    }
+  );
+
+}
+
+
+function dbGet(
+  storeName,
+  key
+) {
+
+  return new Promise(
+    function(resolve, reject) {
+
+      const transaction =
+        db.transaction(
+          storeName,
+          'readonly'
+        );
+
+
+      const store =
+        transaction.objectStore(
+          storeName
+        );
+
+
+      const request =
+        store.get(
+          key
+        );
+
+
+      request.onsuccess =
+        function() {
+
+          resolve(
+            request.result
+          );
+
+        };
+
+
+      request.onerror =
+        function() {
+
+          reject(
+            request.error
+          );
+
+        };
+
+    }
+  );
+
+}
+
+
+function dbGetAll(
+  storeName
+) {
+
+  return new Promise(
+    function(resolve, reject) {
+
+      const transaction =
+        db.transaction(
+          storeName,
+          'readonly'
+        );
+
+
+      const store =
+        transaction.objectStore(
+          storeName
+        );
+
+
+      const request =
+        store.getAll();
+
+
+      request.onsuccess =
+        function() {
+
+          resolve(
+            request.result || []
+          );
+
+        };
+
+
+      request.onerror =
+        function() {
+
+          reject(
+            request.error
+          );
+
+        };
+
+    }
+  );
+
+}
+
+
+function dbDelete(
+  storeName,
+  key
+) {
+
+  return new Promise(
+    function(resolve, reject) {
+
+      const transaction =
+        db.transaction(
+          storeName,
+          'readwrite'
+        );
+
+
+      const store =
+        transaction.objectStore(
+          storeName
+        );
+
+
+      const request =
+        store.delete(
+          key
+        );
+
+
+      request.onsuccess =
+        function() {
+
+          resolve();
+
+        };
+
+
+      request.onerror =
+        function() {
+
+          reject(
+            request.error
+          );
+
+        };
+
+    }
+  );
+
+}
+
+
+/********************************************************
+ * CUSTOMERS
+ ********************************************************/
+
+async function getCustomers() {
+
+  return await dbGetAll(
+    CUSTOMER_STORE
+  );
+
+}
+
+
+async function saveCustomers(
+  customers
+) {
+
+  for (
+    let i = 0;
+    i < customers.length;
+    i++
+  ) {
+
+    await dbPut(
+      CUSTOMER_STORE,
+      customers[i]
+    );
+
+  }
+
+}
+
+
+async function findLocalCustomer(
+  crf
+) {
+
+  const customers =
+    await getCustomers();
+
+
+  const searchCRF =
+    String(
+      crf
+    )
+    .trim()
+    .toUpperCase();
+
+
+  for (
+    let i = 0;
+    i < customers.length;
+    i++
+  ) {
+
+    if (
+      String(
+        customers[i].crf
+      )
+      .trim()
+      .toUpperCase()
+      === searchCRF
+    ) {
+
+      return customers[i];
+
+    }
+
+  }
+
+
+  return null;
+
+}
+
+
+/********************************************************
+ * COUNTS
+ ********************************************************/
+
+async function updateCounts() {
+
+  const customers =
+    await getCustomers();
+
+
+  const pending =
+    await dbGetAll(
+      PENDING_STORE
+    );
+
+
+  document.getElementById(
+    'customerCount'
+  ).innerText =
+    customers.length;
+
+
+  document.getElementById(
+    'pendingCount'
+  ).innerText =
+    pending.length;
+
+}
+
+
+/********************************************************
+ * SEARCH
+ ********************************************************/
+
+async function searchCustomer() {
+
+  const crf =
+    document.getElementById(
+      'crfSearch'
+    )
+    .value
+    .trim()
+    .toUpperCase();
+
+
+  if (!crf) {
+
+    showMessage(
+      'searchMessage',
+      'Please enter a CRF number.',
+      false
+    );
+
+    return;
+
+  }
+
+
+  const customer =
+    await findLocalCustomer(
+      crf
+    );
+
+
+  if (!customer) {
+
+    document.getElementById(
+      'customerCard'
+    ).style.display =
+      'none';
+
+
+    showMessage(
+      'searchMessage',
+      navigator.onLine
+        ? 'Customer not found. Try Sync Now to download the latest customer list.'
+        : 'Customer is not available on this phone. Please connect to internet and sync.',
+      false
+    );
+
+    return;
+
+  }
+
+
+  currentCustomer =
+    customer;
+
+
+  hideMessage(
+    'searchMessage'
+  );
+
+
+  await displayCustomer(
+    customer
+  );
+
+}
+
+
+/********************************************************
+ * DISPLAY CUSTOMER
+ ********************************************************/
+
+async function displayCustomer(
+  customer
+) {
+
+  document.getElementById(
+    'customerCard'
+  ).style.display =
+    'block';
+
+
+  document.getElementById(
+    'customerId'
+  ).innerText =
+    customer.customerId || '';
+
+
+  document.getElementById(
+    'customerName'
+  ).innerText =
+    customer.name || '';
+
+
+  document.getElementById(
+    'customerCRF'
+  ).innerText =
+    customer.crf || '';
+
+
+  document.getElementById(
+    'customerAddress'
+  ).innerText =
+    customer.address || '';
+
+
+  document.getElementById(
+    'customerPhone'
+  ).innerText =
+    customer.phone || '';
+
+
+  document.getElementById(
+    'customerArea'
+  ).innerText =
+    customer.area || '';
+
+
+  const key =
+    String(
+      customer.crf
+    )
+    .trim()
+    .toUpperCase();
+
+
+  const payment =
+    await dbGet(
+      PAYMENT_STORE,
+      key
+    );
+
+
+  if (payment) {
+
+    document.getElementById(
+      'lastPaidDate'
+    ).innerText =
+      formatDisplayDate(
+        payment.lastPaymentDate
+      ) ||
+      'No previous payment';
+
+
+    document.getElementById(
+      'paidThrough'
+    ).innerText =
+      formatDisplayDate(
+        payment.paidThrough
+      ) ||
+      '-';
+
+
+    document.getElementById(
+      'lastAmount'
+    ).innerText =
+      Number(
+        payment.lastPaymentAmount || 0
+      )
+      .toFixed(2);
+
+
+    document.getElementById(
+      'lastPaymentType'
+    ).innerText =
+      payment.lastPaymentType ||
+      '-';
+
+  } else {
+
+    document.getElementById(
+      'lastPaidDate'
+    ).innerText =
+      'No previous payment';
+
+
+    document.getElementById(
+      'paidThrough'
+    ).innerText =
+      '-';
+
+
+    document.getElementById(
+      'lastAmount'
+    ).innerText =
+      '0.00';
+
+
+    document.getElementById(
+      'lastPaymentType'
+    ).innerText =
+      '-';
+
+  }
+
+
+  calculateAdvance();
+
+}
+
+
+/********************************************************
+ * PAYMENT TYPE
+ ********************************************************/
+
+function paymentTypeChanged() {
+
+  const type =
+    document.getElementById(
+      'paymentType'
+    ).value;
+
+
+  const box =
+    document.getElementById(
+      'advanceBox'
+    );
+
+
+  if (type === 'Advance') {
+
+    box.classList.remove(
+      'hidden'
+    );
+
+  } else {
+
+    box.classList.add(
+      'hidden'
+    );
+
+  }
+
+
+  calculateAdvance();
+
+}
+
+
+/********************************************************
+ * ADVANCE CALCULATION
+ *
+ * RULE:
+ *
+ * First month = actual payment day.
+ *
+ * All following months = first day
+ * of that month.
+ *
+ * Example:
+ *
+ * 29-08-2026
+ * 01-09-2026
+ * 01-10-2026
+ * 01-11-2026
+ ********************************************************/
+
+function getAdvanceDate(
+  startDate,
+  index
+) {
+
+  const start =
+    new Date(
+      startDate
+    );
+
+
+  if (
+    index === 0
+  ) {
+
+    return new Date(
+      start
+    );
+
+  }
+
+
+  return new Date(
+    start.getFullYear(),
+    start.getMonth() + index,
+    1
+  );
+
+}
+
+
+function calculateAdvance() {
+
+  const amount =
+    Number(
+      document.getElementById(
+        'amount'
+      ).value
+    ) || 0;
+
+
+  const months =
+    Number(
+      document.getElementById(
+        'months'
+      ).value
+    ) || 1;
+
+
+  const monthly =
+    months > 0
+      ? amount / months
+      : 0;
+
+
+  document.getElementById(
+    'monthlyAmount'
+  ).innerText =
+    monthly.toFixed(2);
+
+
+  const today =
+    new Date();
+
+
+  const endDate =
+    getAdvanceDate(
+      today,
+      Math.max(
+        months - 1,
+        0
+      )
+    );
+
+
+  document.getElementById(
+    'advanceStartDate'
+  ).innerText =
+    formatDate(
+      today
+    );
+
+
+  document.getElementById(
+    'advanceEndDate'
+  ).innerText =
+    formatDate(
+      endDate
+    );
+
+
+  document.getElementById(
+    'advanceEntryCount'
+  ).innerText =
+    months;
+
+
+  let html = '';
+
+
+  for (
+    let i = 0;
+    i < months;
+    i++
+  ) {
+
+    const date =
+      getAdvanceDate(
+        today,
+        i
+      );
+
+
+    html +=
+      'Month ' +
+      (i + 1) +
+      ': ' +
+      formatDate(
+        date
+      ) +
+      '<br>';
+
+  }
+
+
+  document.getElementById(
+    'advanceSchedule'
+  ).innerHTML =
+    html;
+
+}
+
+
+/********************************************************
+ * SAVE COLLECTION
+ ********************************************************/
+
+async function saveCollection() {
+
+  if (!currentCustomer) {
+
+    showMessage(
+      'saveMessage',
+      'Please search for a customer first.',
+      false
+    );
+
+    return;
+
+  }
+
+
+  const amount =
+    Number(
+      document.getElementById(
+        'amount'
+      ).value
+    );
+
+
+  if (
+    !amount ||
+    amount <= 0
+  ) {
+
+    showMessage(
+      'saveMessage',
+      'Please enter a valid amount.',
+      false
+    );
+
+    return;
+
+  }
+
+
+  const type =
+    document.getElementById(
+      'paymentType'
+    ).value;
+
+
+  let months = 1;
+
+
+  if (
+    type === 'Advance'
+  ) {
+
+    months =
+      Number(
+        document.getElementById(
+          'months'
+        ).value
+      );
+
+
+    if (
+      !months ||
+      months < 1
+    ) {
+
+      showMessage(
+        'saveMessage',
+        'Please enter a valid number of months.',
+        false
+      );
+
+      return;
+
+    }
+
+  }
+
+
+  const remarks =
+    document.getElementById(
+      'remarks'
+    )
+    .value
+    .trim();
+
+
+  const today =
+    new Date();
+
+
+  const monthly =
+    type === 'Advance'
+      ? amount / months
+      : amount;
+
+
+  /*
+   * Regular:
+   *
+   * One collection.
+   */
+
+  if (
+    type === 'Regular'
+  ) {
+
+    await dbPut(
+      PENDING_STORE,
+      {
+
+        transactionId:
+          createTransactionId(),
+
+        transactionDate:
+          today.toISOString(),
+
+        coveredDate:
+          today.toISOString(),
+
+        crf:
+          currentCustomer.crf,
+
+        amount:
+          Number(
+            amount.toFixed(2)
+          ),
+
+        paymentType:
+          'Regular',
+
+        agent:
+          getAgent(),
+
+        remarks:
+          remarks
+
+      }
+    );
+
+  }
+
+
+  /*
+   * Advance:
+   *
+   * One entry for each month.
+   *
+   * First month:
+   * actual payment day.
+   *
+   * Remaining months:
+   * first day of month.
+   */
+
+  if (
+    type === 'Advance'
+  ) {
+
+    for (
+      let i = 0;
+      i < months;
+      i++
+    ) {
+
+      const coveredDate =
+        getAdvanceDate(
+          today,
+          i
+        );
+
+
+      let entryAmount =
+        Number(
+          monthly.toFixed(2)
+        );
+
+
+      /*
+       * Put any rounding difference
+       * into the final month.
+       */
+
+      if (
+        i === months - 1
+      ) {
+
+        entryAmount =
+          Number(
+            (
+              amount -
+              (
+                Number(
+                  monthly.toFixed(2)
+                ) *
+                (months - 1)
+              )
+            )
+            .toFixed(2)
+          );
+
+      }
+
+
+      await dbPut(
+        PENDING_STORE,
+        {
+
+          transactionId:
+            createTransactionId(),
+
+          transactionDate:
+            today.toISOString(),
+
+          coveredDate:
+            coveredDate.toISOString(),
+
+          crf:
+            currentCustomer.crf,
+
+          amount:
+            entryAmount,
+
+          paymentType:
+            'Advance',
+
+          agent:
+            getAgent(),
+
+          remarks:
+            (
+              remarks
+                ? remarks + ' | '
+                : ''
+            ) +
+            'Advance month ' +
+            (i + 1) +
+            ' of ' +
+            months
+
+        }
+      );
+
+    }
+
+  }
+
+
+  /*
+   * Update local payment summary.
+   */
+
+  await updateLocalPaymentSummary(
+    currentCustomer.crf,
+    today,
+    amount,
+    type,
+    months
+  );
+
+
+  await updateCounts();
+
+
+  clearForm();
+
+
+  showMessage(
+
+    'saveMessage',
+
+    navigator.onLine
+
+      ? 'Collection saved. Synchronizing...'
+
+      : 'Collection saved offline. It will synchronize when internet returns.',
+
+    true
+
+  );
+
+
+  if (
+    navigator.onLine
+  ) {
+
+    syncNow();
+
+  }
+
+}
+
+
+/********************************************************
+ * LOCAL PAYMENT SUMMARY
+ ********************************************************/
+
+async function updateLocalPaymentSummary(
+  crf,
+  transactionDate,
+  amount,
+  type,
+  months
+) {
+
+  const key =
+    String(
+      crf
+    )
+    .trim()
+    .toUpperCase();
+
+
+  const existing =
+    await dbGet(
+      PAYMENT_STORE,
+      key
+    );
+
+
+  let paidThrough =
+    new Date(
+      transactionDate
+    );
+
+
+  if (
+    type === 'Advance'
+  ) {
+
+    paidThrough =
+      getAdvanceDate(
+        transactionDate,
+        months - 1
+      );
+
+  }
+
+
+  if (
+    existing &&
+    existing.paidThrough
+  ) {
+
+    const existingDate =
+      new Date(
+        existing.paidThrough
+      );
+
+
+    if (
+      existingDate >
+      paidThrough
+    ) {
+
+      paidThrough =
+        existingDate;
+
+    }
+
+  }
+
+
+  await dbPut(
+    PAYMENT_STORE,
+    {
+
+      crf:
+        key,
+
+      lastPaymentDate:
+        transactionDate.toISOString(),
+
+      lastPaymentAmount:
+        amount,
+
+      lastPaymentType:
+        type,
+
+      paidThrough:
+        paidThrough.toISOString()
+
+    }
+  );
+
+
+  if (
+    currentCustomer &&
+    String(
+      currentCustomer.crf
+    )
+    .trim()
+    .toUpperCase()
+    === key
+  ) {
+
+    await displayCustomer(
+      currentCustomer
+    );
+
+  }
+
+}
+
+
+/********************************************************
+ * SYNCHRONIZATION
+ ********************************************************/
+
+async function syncNow() {
+
+  if (syncing) {
+
+    return;
+
+  }
+
+
+  if (
+    !navigator.onLine
+  ) {
+
+    updateConnectionStatus();
+
+    setSyncStatus(
+      'Offline. Waiting for internet connection.'
+    );
+
+    return;
+
+  }
+
+
+  if (
+    API_URL ===
+    'PASTE_APPS_SCRIPT_EXEC_URL_HERE'
+  ) {
+
+    setSyncStatus(
+      'Apps Script URL is not configured yet.'
+    );
+
+    return;
+
+  }
+
+
+  syncing = true;
+
+
+  const button =
+    document.getElementById(
+      'syncButton'
+    );
+
+
+  button.classList.add(
+    'syncing'
+  );
+
+
+  setSyncStatus(
+    'Synchronizing...'
+  );
+
+
+  try {
+
+    const pending =
+      await dbGetAll(
+        PENDING_STORE
+      );
+
+
+    const response =
+      await fetch(
+        API_URL,
+        {
+
+          method:
+            'POST',
+
+          headers: {
+
+            'Content-Type':
+              'text/plain;charset=utf-8'
+
+          },
+
+          body:
+            JSON.stringify({
+
+              action:
+                'sync',
+
+              pending:
+                pending,
+
+              agent:
+                getAgent()
+
+            })
+
+        }
+      );
+
+
+    if (
+      !response.ok
+    ) {
+
+      throw new Error(
+        'HTTP ' +
+        response.status
+      );
+
+    }
+
+
+    const result =
+      await response.json();
+
+
+    if (
+      !result ||
+      !result.success
+    ) {
+
+      throw new Error(
+
+        result &&
+        result.message
+
+          ? result.message
+
+          : 'Sync failed'
+
+      );
+
+    }
+
+
+    /*
+     * Delete only transactions
+     * confirmed by server.
+     */
+
+    const syncedIds =
+      Array.isArray(
+        result.syncedIds
+      )
+        ? result.syncedIds
+        : [];
+
+
+    for (
+      let i = 0;
+      i < syncedIds.length;
+      i++
+    ) {
+
+      await dbDelete(
+        PENDING_STORE,
+        syncedIds[i]
+      );
+
+    }
+
+
+    /*
+     * Store fresh customer data.
+     */
+
+    if (
+      Array.isArray(
+        result.customers
+      )
+    ) {
+
+      await saveCustomers(
+        result.customers
+      );
+
+    }
+
+
+    /*
+     * Store fresh payment summary.
+     */
+
+    if (
+      result.payments
+    ) {
+
+      const keys =
+        Object.keys(
+          result.payments
+        );
+
+
+      for (
+        let i = 0;
+        i < keys.length;
+        i++
+      ) {
+
+        const key =
+          keys[i];
+
+
+        await dbPut(
+          PAYMENT_STORE,
+          {
+
+            crf:
+              key,
+
+            ...result.payments[key]
+
+          }
+        );
+
+      }
+
+    }
+
+
+    await updateCounts();
+
+
+    /*
+     * Refresh current customer.
+     */
+
+    if (
+      currentCustomer
+    ) {
+
+      const updated =
+        await findLocalCustomer(
+          currentCustomer.crf
+        );
+
+
+      if (
+        updated
+      ) {
+
+        currentCustomer =
+          updated;
+
+        await displayCustomer(
+          updated
+        );
+
+      }
+
+    }
+
+
+    const remaining =
+      await dbGetAll(
+        PENDING_STORE
+      );
+
+
+    if (
+      remaining.length === 0
+    ) {
+
+      setSyncStatus(
+        '✅ Sync successful. All collections are synchronized.'
+      );
+
+    } else {
+
+      setSyncStatus(
+        '⚠️ ' +
+        remaining.length +
+        ' collection(s) still pending.'
+      );
+
+    }
+
+
+  } catch (error) {
+
+    console.error(
+      'Sync error:',
+      error
+    );
+
+
+    await updateCounts();
+
+
+    setSyncStatus(
+      '❌ Sync failed. Pending collections are safely stored on this phone.'
+    );
+
+  } finally {
+
+    syncing = false;
+
+    button.classList.remove(
+      'syncing'
+    );
+
+  }
+
+}
+
+
+/********************************************************
+ * AGENT
+ ********************************************************/
+
+function getAgent() {
+
+  /*
+   * For now this is AG001.
+   *
+   * Later we can add an Agent Login screen
+   * and store the agent securely.
+   */
+
+  return 'AG001';
+
+}
+
+
+/********************************************************
+ * TRANSACTION ID
+ ********************************************************/
+
+function createTransactionId() {
+
+  return (
+
+    'COL-' +
+
+    Date.now()
+      .toString(36) +
+
+    '-' +
+
+    Math.random()
+      .toString(36)
+      .substring(2, 10)
+
+  );
+
+}
+
+
+/********************************************************
+ * DATE FUNCTIONS
+ ********************************************************/
+
+function formatDate(
+  date
+) {
+
+  const d =
+    new Date(
+      date
+    );
+
+
+  if (
+    isNaN(
+      d.getTime()
+    )
+  ) {
+
+    return '-';
+
+  }
+
+
+  return (
+
+    String(
+      d.getDate()
+    )
+    .padStart(
+      2,
+      '0'
+    ) +
+
+    '-' +
+
+    String(
+      d.getMonth() + 1
+    )
+    .padStart(
+      2,
+      '0'
+    ) +
+
+    '-' +
+
+    d.getFullYear()
+
+  );
+
+}
+
+
+function formatDisplayDate(
+  value
+) {
+
+  if (!value) {
+
+    return '';
+
+  }
+
+
+  const date =
+    new Date(
+      value
+    );
+
+
+  if (
+    isNaN(
+      date.getTime()
+    )
+  ) {
+
+    return '';
+
+  }
+
+
+  return formatDate(
+    date
+  );
+
+}
+
+
+/********************************************************
+ * FORM
+ ********************************************************/
+
+function clearForm() {
+
+  document.getElementById(
+    'amount'
+  ).value =
+    '';
+
+
+  document.getElementById(
+    'months'
+  ).value =
+    '1';
+
+
+  document.getElementById(
+    'remarks'
+  ).value =
+    '';
+
+
+  document.getElementById(
+    'paymentType'
+  ).value =
+    'Regular';
+
+
+  document.getElementById(
+    'advanceBox'
+  )
+  .classList
+  .add(
+    'hidden'
+  );
+
+
+  calculateAdvance();
+
+}
+
+
+/********************************************************
+ * MESSAGE
+ ********************************************************/
+
+function showMessage(
+  id,
+  message,
+  success
+) {
+
+  const element =
+    document.getElementById(
+      id
+    );
+
+
+  element.className =
+    'message ' +
+    (
+      success
+        ? 'success'
+        : 'error'
+    );
+
+
+  element.innerText =
+    message;
+
+}
+
+
+function hideMessage(
+  id
+) {
+
+  const element =
+    document.getElementById(
+      id
+    );
+
+
+  element.className =
+    'message';
+
+
+  element.innerText =
+    '';
+
+}
+
+
+function setSyncStatus(
+  message
+) {
+
+  document.getElementById(
+    'syncStatus'
+  )
+  .innerText =
+    message;
+
+}
+
+
+/********************************************************
+ * SERVICE WORKER
+ ********************************************************/
+
+function registerServiceWorker() {
+
+  if (
+    'serviceWorker'
+    in navigator
+  ) {
+
+    navigator.serviceWorker
+      .register(
+        './service-worker.js'
+      )
+      .then(
+        function() {
+
+          console.log(
+            'Service worker registered.'
+          );
+
+        }
+      )
+      .catch(
+        function(error) {
+
+          console.log(
+            'Service worker registration failed:',
+            error
+          );
+
+        }
+      );
+
+  }
+
+}
+
+
+</script>
+
+
 </body>
+
 </html>
