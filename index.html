@@ -359,7 +359,7 @@
       <div class="info-row">
 
         <span class="label">
-          Paid Through:
+          PAID TILL:
         </span>
 
         <span id="paidThrough">
@@ -552,9 +552,7 @@
 /********************************************************
  * GOOGLE APPS SCRIPT URL
  *
- * KEEP THIS AS MYCODE FOR NOW.
- *
- * We will replace this in Step 5.
+ * Replace this with your actual Apps Script Web App URL.
  ********************************************************/
 
 const API_URL =
@@ -599,11 +597,6 @@ window.addEventListener(
 
     registerServiceWorker();
 
-
-    /*
-     * If already online,
-     * try synchronization.
-     */
 
     if (navigator.onLine) {
 
@@ -1206,14 +1199,6 @@ function saveCollection() {
 
   /******************************************************
    * ADVANCE PAYMENT
-   *
-   * Example:
-   *
-   * ₹2700
-   * 10 months
-   *
-   * Creates monthly entries.
-   *
    ******************************************************/
 
   if (
@@ -1780,10 +1765,6 @@ function getAgent() {
   } catch (error) {}
 
 
-  /*
-   * Current agent.
-   */
-
   return 'AG001';
 
 }
@@ -1870,6 +1851,15 @@ function addMonths(
 }
 
 
+/********************************************************
+ * DATE DISPLAY
+ *
+ * OUTPUT:
+ *
+ * 29 AUGUST 2026
+ *
+ ********************************************************/
+
 function formatDate(
   date
 ) {
@@ -1891,6 +1881,35 @@ function formatDate(
   }
 
 
+  const months = [
+
+    'JANUARY',
+
+    'FEBRUARY',
+
+    'MARCH',
+
+    'APRIL',
+
+    'MAY',
+
+    'JUNE',
+
+    'JULY',
+
+    'AUGUST',
+
+    'SEPTEMBER',
+
+    'OCTOBER',
+
+    'NOVEMBER',
+
+    'DECEMBER'
+
+  ];
+
+
   return (
 
     String(
@@ -1901,17 +1920,13 @@ function formatDate(
       '0'
     ) +
 
-    '-' +
+    ' ' +
 
-    String(
-      d.getMonth() + 1
-    )
-    .padStart(
-      2,
-      '0'
-    ) +
+    months[
+      d.getMonth()
+    ] +
 
-    '-' +
+    ' ' +
 
     d.getFullYear()
 
