@@ -1234,25 +1234,16 @@ async function syncNow() {
     true;
 
 
-  try {
+try {
 
-    const pending =
-      getPending();
-
-
-    setSyncStatus(
-      'Synchronizing customers...'
-    );
+  const pending =
+    getPending();
 
 
-    setDebug(
-      'Connecting to Google Apps Script...'
-    );
+  console.log(
+    'Sync request started.'
+  );
 
-
-    console.log(
-      'Sync request started.'
-    );
 
 
     const response =
