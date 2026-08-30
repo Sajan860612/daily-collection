@@ -1,141 +1,89 @@
 const CACHE_NAME = 'daily-collection-v2';
 
-const FILES_TO_CACHE = [
+const APP_FILES = [
   './',
   './index.html',
-  './manifest.json',
-  './service-worker.js'
+  './manifest.json'
 ];
 
+
+// Install
 self.addEventListener('install', event => {
 
   event.waitUntil(
 
     caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(FILES_TO_CACHE))
+      .then(cache => cache.addAll(APP_FILES))
+      .then(() => self.skipWaiting())
 
   );
-
-  self.skipWaiting();
 
 });
 
 
+// Activate
 self.addEventListener('activate', event => {
 
   event.waitUntil(
 
-    caches.keys().then(keys =>
+    caches.keys()
+      .then(cacheNames => {
 
-      Promise.all(
+        return Promise.all(
 
-        keys
-          .filter(key => key !== CACHE_NAME)
-          .map(key => caches.delete(key))
+          cacheNames
+            .filter(name => name !== CACHE_NAME)
+            .map(name => caches.delete(name))
 
-      )
+        );
 
-    )
+      })
+      .then(() => self.clients.claim())
 
   );
-
-  self.clients.claim();
 
 });
 
 
+// Fetch
 self.addEventListener('fetch', event => {
 
-  /*
-   * Only handle GET requests.
-   */
-
-  if (event.request.method !== 'GET') {
-
-    return;
-
-  }
-
-
-  /*
-   * App files:
-   * cache first.
-   */
-
-  const url =
-    new URL(event.request.url);
-
-
+  // Do not cache Google Apps Script/API requests
   if (
-    url.origin === location.origin
+    event.request.url.includes('script.google.com')
   ) {
 
-    event.respondWith(
-
-      caches.match(event.request)
-        .then(cachedResponse => {
-
-          if (cachedResponse) {
-
-            return cachedResponse;
-
-          }
-
-
-          return fetch(event.request)
-            .then(response => {
-
-              /*
-               * Save successful response
-               * into cache.
-               */
-
-              if (
-                response &&
-                response.status === 200
-              ) {
-
-                const copy =
-                  response.clone();
-
-
-                caches.open(CACHE_NAME)
-                  .then(cache => {
-
-                    cache.put(
-                      event.request,
-                      copy
-                    );
-
-                  });
-
-              }
-
-
-              return response;
-
-            });
-
-        })
-
-    );
-
     return;
 
   }
 
-
-  /*
-   * External requests:
-   * network only.
-   *
-   * This includes the Google Apps
-   * Script API.
-   */
 
   event.respondWith(
 
     fetch(event.request)
+      .then(response => {
+
+        // Save the latest successful response
+        const responseClone =
+          response.clone();
+
+        caches.open(CACHE_NAME)
+          .then(cache => {
+            cache.put(
+              event.request,
+              responseClone
+            );
+          });
+
+        return response;
+
+      })
+      .catch(() => {
+
+        // If offline, use cached version
+        return caches.match(event.request);
+
+      })
 
   );
 
