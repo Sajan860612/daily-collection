@@ -27,13 +27,11 @@
 
   <title>Daily Collection</title>
 
-
   <style>
 
     * {
       box-sizing: border-box;
     }
-
 
     body {
       margin: 0;
@@ -42,7 +40,6 @@
       color: #111827;
     }
 
-
     .header {
       background: #166534;
       color: white;
@@ -50,18 +47,15 @@
       text-align: center;
     }
 
-
     .header h2 {
       margin: 0 0 8px;
     }
-
 
     .container {
       max-width: 600px;
       margin: auto;
       padding: 15px;
     }
-
 
     .card {
       background: white;
@@ -71,13 +65,11 @@
       box-shadow: 0 2px 8px rgba(0,0,0,.08);
     }
 
-
     label {
       display: block;
       font-weight: bold;
       margin: 12px 0 6px;
     }
-
 
     input,
     select,
@@ -91,7 +83,6 @@
       color: #111827;
     }
 
-
     input:focus,
     select:focus,
     textarea:focus {
@@ -100,12 +91,10 @@
       box-shadow: 0 0 0 2px rgba(22,101,52,.12);
     }
 
-
     textarea {
       min-height: 90px;
       resize: vertical;
     }
-
 
     button {
       width: 100%;
@@ -118,23 +107,19 @@
       cursor: pointer;
     }
 
-
     button:active {
       transform: scale(.99);
     }
-
 
     .search {
       background: #2563eb;
       color: white;
     }
 
-
     .save {
       background: #16a34a;
       color: white;
     }
-
 
     .info {
       background: #f0fdf4;
@@ -143,26 +128,21 @@
       margin-top: 12px;
     }
 
-
     .info-row {
       padding: 7px 0;
     }
-
 
     .label {
       font-weight: bold;
     }
 
-
     .online {
       color: #bbf7d0;
     }
 
-
     .offline {
       color: #fecaca;
     }
-
 
     .message {
       display: none;
@@ -171,13 +151,11 @@
       border-radius: 8px;
     }
 
-
     .success {
       display: block;
       background: #dcfce7;
       color: #166534;
     }
-
 
     .error {
       display: block;
@@ -185,11 +163,9 @@
       color: #991b1b;
     }
 
-
     .customer {
       display: none;
     }
-
 
     .pending {
       background: #fff7ed;
@@ -199,7 +175,6 @@
       margin-top: 10px;
     }
 
-
     .payment-for-box {
       background: #eff6ff;
       border: 1px solid #bfdbfe;
@@ -208,7 +183,6 @@
       margin-top: 10px;
     }
 
-
     .payment-for-help {
       color: #1e40af;
       font-size: 13px;
@@ -216,13 +190,11 @@
       line-height: 1.4;
     }
 
-
     .sync-status {
       font-size: 13px;
       margin-top: 8px;
       color: #166534;
     }
-
 
     .top-save {
       margin-top: 0;
@@ -233,9 +205,7 @@
 
 </head>
 
-
 <body>
-
 
 <header class="header">
 
@@ -249,9 +219,7 @@
 
 </header>
 
-
 <main class="container">
-
 
   <!-- STATUS CARD -->
 
@@ -265,7 +233,6 @@
       0
     </span>
 
-
     <div class="pending">
 
       Pending collections:
@@ -275,7 +242,6 @@
       </strong>
 
     </div>
-
 
     <div
       id="syncStatus"
@@ -287,16 +253,14 @@
   </div>
 
 
-  <!-- TOP SAVE BUTTON -->
+  <!-- SAVE BUTTON -->
 
   <button
     id="topSaveButton"
     class="save top-save"
     onclick="saveCollection()"
   >
-
     💰 Save Collection
-
   </button>
 
 
@@ -308,7 +272,6 @@
       CRF Number
     </label>
 
-
     <input
       id="crfSearch"
       type="text"
@@ -316,16 +279,12 @@
       autocomplete="off"
     >
 
-
     <button
       class="search"
       onclick="searchCustomer()"
     >
-
       🔍 Search Customer
-
     </button>
-
 
     <div
       id="searchMessage"
@@ -344,9 +303,7 @@
 
     <h3 id="customerName"></h3>
 
-
     <div class="info">
-
 
       <div class="info-row">
 
@@ -358,7 +315,6 @@
 
       </div>
 
-
       <div class="info-row">
 
         <span class="label">
@@ -368,7 +324,6 @@
         <span id="customerAddress"></span>
 
       </div>
-
 
       <div class="info-row">
 
@@ -380,7 +335,6 @@
 
       </div>
 
-
       <div class="info-row">
 
         <span class="label">
@@ -390,7 +344,6 @@
         <span id="customerArea"></span>
 
       </div>
-
 
       <div class="info-row">
 
@@ -404,7 +357,6 @@
 
       </div>
 
-
       <div class="info-row">
 
         <span class="label">
@@ -417,7 +369,6 @@
 
       </div>
 
-
     </div>
 
 
@@ -429,12 +380,10 @@
         Payment For
       </label>
 
-
       <input
         id="paymentFor"
         type="month"
       >
-
 
       <div class="payment-for-help">
 
@@ -456,35 +405,25 @@
       Remarks
     </label>
 
-
     <textarea
       id="remarks"
       placeholder="Optional"
     ></textarea>
-
 
     <div
       id="saveMessage"
       class="message"
     ></div>
 
-
   </div>
-
 
 </main>
 
 
 <script>
 
-
 /********************************************************
  * GOOGLE APPS SCRIPT URL
- *
- * PUT YOUR APPS SCRIPT WEB APP URL HERE.
- *
- * THIS IS THE ONLY PLACE IN HTML WHERE THE API URL
- * NEEDS TO BE ENTERED.
  ********************************************************/
 
 const API_URL =
@@ -498,10 +437,8 @@ const API_URL =
 const AUTO_SYNC_INTERVAL =
   5000;
 
-
 let syncInProgress =
   false;
-
 
 let currentCustomer =
   null;
@@ -514,14 +451,11 @@ let currentCustomer =
 const CUSTOMER_KEY =
   'dailyCollectionCustomers';
 
-
 const PAYMENT_KEY =
   'dailyCollectionPayments';
 
-
 const PENDING_KEY =
   'dailyCollectionPending';
-
 
 const AGENT_KEY =
   'dailyCollectionAgent';
@@ -537,48 +471,27 @@ function startApplication() {
     'Daily Collection application started'
   );
 
-
   updateConnectionStatus();
-
 
   updateCounts();
 
-
   setDefaultPaymentFor();
-
 
   registerServiceWorker();
 
-
-  if (
-    navigator.onLine
-  ) {
-
+  if (navigator.onLine) {
     syncNow();
-
   }
 
+  setInterval(function() {
 
-  setInterval(
+    if (navigator.onLine) {
+      syncNow();
+    }
 
-    function() {
-
-      if (
-        navigator.onLine
-      ) {
-
-        syncNow();
-
-      }
-
-    },
-
-    AUTO_SYNC_INTERVAL
-
-  );
+  }, AUTO_SYNC_INTERVAL);
 
 }
-
 
 startApplication();
 
@@ -620,17 +533,11 @@ function updateConnectionStatus() {
       'connectionStatus'
     );
 
-
   if (!element) {
-
     return;
-
   }
 
-
-  if (
-    navigator.onLine
-  ) {
+  if (navigator.onLine) {
 
     element.innerText =
       '🟢 Online • Auto Sync ON';
@@ -660,11 +567,9 @@ function getCustomers() {
   try {
 
     return JSON.parse(
-
       localStorage.getItem(
         CUSTOMER_KEY
       ) || '[]'
-
     );
 
   } catch (error) {
@@ -686,11 +591,9 @@ function getPayments() {
   try {
 
     return JSON.parse(
-
       localStorage.getItem(
         PAYMENT_KEY
       ) || '{}'
-
     );
 
   } catch (error) {
@@ -712,11 +615,9 @@ function getPending() {
   try {
 
     return JSON.parse(
-
       localStorage.getItem(
         PENDING_KEY
       ) || '[]'
-
     );
 
   } catch (error) {
@@ -740,12 +641,10 @@ function updateCounts() {
       'customerCount'
     );
 
-
   const pendingCount =
     document.getElementById(
       'pendingCount'
     );
-
 
   if (customerCount) {
 
@@ -753,7 +652,6 @@ function updateCounts() {
       getCustomers().length;
 
   }
-
 
   if (pendingCount) {
 
@@ -776,31 +674,23 @@ function setDefaultPaymentFor() {
       'paymentFor'
     );
 
-
   if (!input) {
-
     return;
-
   }
-
 
   const today =
     new Date();
 
-
   const year =
     today.getFullYear();
-
 
   const month =
     String(
       today.getMonth() + 1
-    )
-    .padStart(
+    ).padStart(
       2,
       '0'
     );
-
 
   input.value =
     year + '-' + month;
@@ -822,31 +712,23 @@ function searchCustomer() {
     .trim()
     .toUpperCase();
 
-
   if (!crf) {
 
     showMessage(
-
       'searchMessage',
-
       'Please enter a CRF number.',
-
       false
-
     );
 
     return;
 
   }
 
-
   const customers =
     getCustomers();
 
-
   const customer =
     customers.find(
-
       function(item) {
 
         return String(
@@ -857,9 +739,7 @@ function searchCustomer() {
         === crf;
 
       }
-
     );
-
 
   if (!customer) {
 
@@ -868,30 +748,22 @@ function searchCustomer() {
     ).style.display =
       'none';
 
-
     showMessage(
-
       'searchMessage',
-
       'Customer not found on this phone. Automatic synchronization will update customer data when available.',
-
       false
-
     );
 
     return;
 
   }
 
-
   currentCustomer =
     customer;
-
 
   hideMessage(
     'searchMessage'
   );
-
 
   displayCustomer(
     customer
@@ -913,40 +785,33 @@ function displayCustomer(
   ).style.display =
     'block';
 
-
   document.getElementById(
     'customerName'
   ).innerText =
     customer.name || '';
-
 
   document.getElementById(
     'customerCRF'
   ).innerText =
     customer.crf || '';
 
-
   document.getElementById(
     'customerAddress'
   ).innerText =
     customer.address || '';
-
 
   document.getElementById(
     'customerPhone'
   ).innerText =
     customer.phone || '';
 
-
   document.getElementById(
     'customerArea'
   ).innerText =
     customer.area || '';
 
-
   const payments =
     getPayments();
-
 
   const payment =
     payments[
@@ -957,10 +822,7 @@ function displayCustomer(
       .toUpperCase()
     ];
 
-
-  if (
-    payment
-  ) {
+  if (payment) {
 
     document.getElementById(
       'lastPaidDate'
@@ -969,7 +831,6 @@ function displayCustomer(
         payment.lastPaymentDate
       ) ||
       'No previous payment';
-
 
     document.getElementById(
       'paidThrough'
@@ -986,7 +847,6 @@ function displayCustomer(
     ).innerText =
       'No previous payment';
 
-
     document.getElementById(
       'paidThrough'
     ).innerText =
@@ -999,18 +859,6 @@ function displayCustomer(
 
 /********************************************************
  * SAVE COLLECTION
- *
- * NO AMOUNT
- * NO PAYMENT TYPE
- *
- * The collection contains:
- *
- * Transaction ID
- * Transaction Date
- * Covered Date
- * CRF
- * Agent
- * Remarks
  ********************************************************/
 
 function saveCollection() {
@@ -1018,42 +866,29 @@ function saveCollection() {
   if (!currentCustomer) {
 
     showMessage(
-
       'saveMessage',
-
       'Please search for a customer first.',
-
       false
-
     );
 
     return;
 
   }
-
 
   const paymentForDate =
     getPaymentForDate();
 
-
-  if (
-    !paymentForDate
-  ) {
+  if (!paymentForDate) {
 
     showMessage(
-
       'saveMessage',
-
       'Please select the month this collection is for.',
-
       false
-
     );
 
     return;
 
   }
-
 
   const remarks =
     document.getElementById(
@@ -1062,14 +897,11 @@ function saveCollection() {
     .value
     .trim();
 
-
   const transactionDate =
     new Date();
 
-
   const pending =
     getPending();
-
 
   pending.push({
 
@@ -1093,60 +925,33 @@ function saveCollection() {
 
   });
 
-
   localStorage.setItem(
-
     PENDING_KEY,
-
     JSON.stringify(
       pending
     )
-
   );
-
-
-  /*
-   * Update local payment information.
-   */
 
   updateLocalPaymentSummary(
-
     currentCustomer.crf,
-
     transactionDate,
-
     paymentForDate
-
   );
-
 
   updateCounts();
 
-
   clearForm();
 
-
   showMessage(
-
     'saveMessage',
-
     navigator.onLine
-
       ? 'Collection saved. Automatic synchronization started.'
-
       : 'Collection saved offline. It will synchronize automatically when internet returns.',
-
     true
-
   );
 
-
-  if (
-    navigator.onLine
-  ) {
-
+  if (navigator.onLine) {
     syncNow();
-
   }
 
 }
@@ -1157,18 +962,13 @@ function saveCollection() {
  ********************************************************/
 
 function updateLocalPaymentSummary(
-
   crf,
-
   transactionDate,
-
   paymentForDate
-
 ) {
 
   const payments =
     getPayments();
-
 
   const key =
     String(
@@ -1177,16 +977,13 @@ function updateLocalPaymentSummary(
     .trim()
     .toUpperCase();
 
-
   const existing =
     payments[key];
-
 
   let paidThrough =
     new Date(
       paymentForDate
     );
-
 
   if (
     existing &&
@@ -1197,7 +994,6 @@ function updateLocalPaymentSummary(
       new Date(
         existing.paidThrough
       );
-
 
     if (
       existingDate >
@@ -1211,7 +1007,6 @@ function updateLocalPaymentSummary(
 
   }
 
-
   payments[key] = {
 
     lastPaymentDate:
@@ -1222,17 +1017,12 @@ function updateLocalPaymentSummary(
 
   };
 
-
   localStorage.setItem(
-
     PAYMENT_KEY,
-
     JSON.stringify(
       payments
     )
-
   );
-
 
   if (
     currentCustomer &&
@@ -1259,9 +1049,7 @@ function updateLocalPaymentSummary(
 
 async function syncNow() {
 
-  if (
-    !navigator.onLine
-  ) {
+  if (!navigator.onLine) {
 
     updateConnectionStatus();
 
@@ -1269,20 +1057,14 @@ async function syncNow() {
 
   }
 
-
-  if (
-    syncInProgress
-  ) {
-
+  if (syncInProgress) {
     return;
-
   }
-
 
   if (
     !API_URL ||
     API_URL ===
-    'PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE'
+    'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE'
   ) {
 
     console.error(
@@ -1293,18 +1075,10 @@ async function syncNow() {
 
   }
 
-
   const pending =
     getPending();
 
-
-  /*
-   * Nothing to synchronize.
-   */
-
-  if (
-    pending.length === 0
-  ) {
+  if (pending.length === 0) {
 
     updateCounts();
 
@@ -1312,10 +1086,8 @@ async function syncNow() {
 
   }
 
-
   syncInProgress =
     true;
-
 
   try {
 
@@ -1324,46 +1096,27 @@ async function syncNow() {
       new Date().toLocaleTimeString()
     );
 
-
     const response =
       await fetch(
-
         API_URL,
-
         {
-
-          method:
-            'POST',
+          method: 'POST',
 
           headers: {
-
             'Content-Type':
               'text/plain;charset=utf-8'
-
           },
 
           body:
             JSON.stringify({
-
-              action:
-                'sync',
-
-              pending:
-                pending,
-
-              agent:
-                getAgent()
-
+              action: 'sync',
+              pending: pending,
+              agent: getAgent()
             })
-
         }
-
       );
 
-
-    if (
-      !response.ok
-    ) {
+    if (!response.ok) {
 
       throw new Error(
         'HTTP ' +
@@ -1372,10 +1125,8 @@ async function syncNow() {
 
     }
 
-
     const result =
       await response.json();
-
 
     if (
       !result ||
@@ -1383,36 +1134,25 @@ async function syncNow() {
     ) {
 
       throw new Error(
-
         result &&
         result.message
-
           ? result.message
-
           : 'Sync failed'
-
       );
 
     }
 
-
     const syncedIds =
       new Set(
-
         Array.isArray(
           result.syncedIds
         )
-
           ? result.syncedIds
-
           : []
-
       );
-
 
     const remaining =
       pending.filter(
-
         function(item) {
 
           return !syncedIds.has(
@@ -1420,24 +1160,14 @@ async function syncNow() {
           );
 
         }
-
       );
 
-
     localStorage.setItem(
-
       PENDING_KEY,
-
       JSON.stringify(
         remaining
       )
-
     );
-
-
-    /*
-     * Update customers received from Google Sheets.
-     */
 
     if (
       Array.isArray(
@@ -1446,57 +1176,36 @@ async function syncNow() {
     ) {
 
       localStorage.setItem(
-
         CUSTOMER_KEY,
-
         JSON.stringify(
           result.customers
         )
-
       );
 
     }
-
-
-    /*
-     * Update payment summary.
-     */
 
     if (
       result.payments
     ) {
 
       localStorage.setItem(
-
         PAYMENT_KEY,
-
         JSON.stringify(
           result.payments
         )
-
       );
 
     }
 
-
     updateCounts();
 
-
-    /*
-     * Refresh current customer.
-     */
-
-    if (
-      currentCustomer
-    ) {
+    if (currentCustomer) {
 
       const customers =
         getCustomers();
 
-
       const updated =
         customers.find(
-
           function(item) {
 
             return String(
@@ -1512,13 +1221,9 @@ async function syncNow() {
             .toUpperCase();
 
           }
-
         );
 
-
-      if (
-        updated
-      ) {
+      if (updated) {
 
         currentCustomer =
           updated;
@@ -1531,41 +1236,26 @@ async function syncNow() {
 
     }
 
-
     document.getElementById(
       'syncStatus'
     ).innerText =
       'Last synchronized: ' +
       new Date().toLocaleTimeString();
 
-
-    if (
-      pending.length > 0
-    ) {
+    if (pending.length > 0) {
 
       showMessage(
-
         'saveMessage',
 
         remaining.length === 0
-
           ? 'All collections synchronized.'
-
           : remaining.length +
             ' collection(s) still pending.',
 
         true
-
       );
 
     }
-
-
-    console.log(
-      'Automatic sync completed:',
-      new Date().toLocaleTimeString()
-    );
-
 
   } catch (error) {
 
@@ -1574,9 +1264,7 @@ async function syncNow() {
       error
     );
 
-
     updateCounts();
-
 
     document.getElementById(
       'syncStatus'
@@ -1603,13 +1291,10 @@ function getAgent() {
 
     const agent =
       JSON.parse(
-
         localStorage.getItem(
           AGENT_KEY
         ) || 'null'
-
       );
-
 
     if (
       agent &&
@@ -1629,7 +1314,6 @@ function getAgent() {
 
   }
 
-
   return 'AG001';
 
 }
@@ -1642,18 +1326,12 @@ function getAgent() {
 function createTransactionId() {
 
   return (
-
     'COL-' +
-
-    Date.now()
-      .toString(36) +
-
+    Date.now().toString(36) +
     '-' +
-
     Math.random()
       .toString(36)
       .substring(2, 10)
-
   );
 
 }
@@ -1670,38 +1348,22 @@ function getPaymentForDate() {
       'paymentFor'
     ).value;
 
-
   if (!value) {
-
     return null;
-
   }
-
 
   const parts =
     value.split('-');
 
-
-  if (
-    parts.length !== 2
-  ) {
-
+  if (parts.length !== 2) {
     return null;
-
   }
 
-
   const year =
-    Number(
-      parts[0]
-    );
-
+    Number(parts[0]);
 
   const month =
-    Number(
-      parts[1]
-    );
-
+    Number(parts[1]);
 
   if (
     !year ||
@@ -1713,7 +1375,6 @@ function getPaymentForDate() {
     return null;
 
   }
-
 
   return new Date(
     year,
@@ -1728,74 +1389,10 @@ function getPaymentForDate() {
  * DATE FUNCTIONS
  ********************************************************/
 
-function addMonths(
-  date,
-  months
-) {
-
-  const result =
-    new Date(
-      date
-    );
-
-
-  const day =
-    result.getDate();
-
-
-  result.setDate(
-    1
-  );
-
-
-  result.setMonth(
-
-    result.getMonth() +
-    months
-
-  );
-
-
-  const lastDay =
-    new Date(
-
-      result.getFullYear(),
-
-      result.getMonth() + 1,
-
-      0
-
-    ).getDate();
-
-
-  result.setDate(
-
-    Math.min(
-      day,
-      lastDay
-    )
-
-  );
-
-
-  return result;
-
-}
-
-
-/********************************************************
- * FORMAT DATE
- ********************************************************/
-
-function formatDate(
-  date
-) {
+function formatDate(date) {
 
   const d =
-    new Date(
-      date
-    );
-
+    new Date(date);
 
   if (
     isNaN(
@@ -1807,83 +1404,45 @@ function formatDate(
 
   }
 
-
   const months = [
-
     'JANUARY',
-
     'FEBRUARY',
-
     'MARCH',
-
     'APRIL',
-
     'MAY',
-
     'JUNE',
-
     'JULY',
-
     'AUGUST',
-
     'SEPTEMBER',
-
     'OCTOBER',
-
     'NOVEMBER',
-
     'DECEMBER'
-
   ];
 
-
   return (
-
     String(
       d.getDate()
-    )
-    .padStart(
+    ).padStart(
       2,
       '0'
     ) +
-
     ' ' +
-
-    months[
-      d.getMonth()
-    ] +
-
+    months[d.getMonth()] +
     ' ' +
-
     d.getFullYear()
-
   );
 
 }
 
 
-/********************************************************
- * DISPLAY DATE
- ********************************************************/
+function formatDisplayDate(value) {
 
-function formatDisplayDate(
-  value
-) {
-
-  if (
-    !value
-  ) {
-
+  if (!value) {
     return '';
-
   }
 
-
   const date =
-    new Date(
-      value
-    );
-
+    new Date(value);
 
   if (
     isNaN(
@@ -1895,10 +1454,7 @@ function formatDisplayDate(
 
   }
 
-
-  return formatDate(
-    date
-  );
+  return formatDate(date);
 
 }
 
@@ -1911,9 +1467,7 @@ function clearForm() {
 
   document.getElementById(
     'remarks'
-  ).value =
-    '';
-
+  ).value = '';
 
   setDefaultPaymentFor();
 
@@ -1931,17 +1485,11 @@ function showMessage(
 ) {
 
   const element =
-    document.getElementById(
-      id
-    );
-
+    document.getElementById(id);
 
   if (!element) {
-
     return;
-
   }
-
 
   element.className =
     'message ' +
@@ -1951,33 +1499,23 @@ function showMessage(
         : 'error'
     );
 
-
   element.innerText =
     message;
 
 }
 
 
-function hideMessage(
-  id
-) {
+function hideMessage(id) {
 
   const element =
-    document.getElementById(
-      id
-    );
-
+    document.getElementById(id);
 
   if (!element) {
-
     return;
-
   }
-
 
   element.className =
     'message';
-
 
   element.innerText =
     '';
@@ -1992,8 +1530,7 @@ function hideMessage(
 function registerServiceWorker() {
 
   if (
-    'serviceWorker'
-    in navigator
+    'serviceWorker' in navigator
   ) {
 
     navigator.serviceWorker
@@ -2001,7 +1538,6 @@ function registerServiceWorker() {
         'service-worker.js'
       )
       .then(
-
         function() {
 
           console.log(
@@ -2009,22 +1545,16 @@ function registerServiceWorker() {
           );
 
         }
-
       )
       .catch(
-
         function(error) {
 
           console.log(
-
             'Service worker registration failed:',
-
             error
-
           );
 
         }
-
       );
 
   }
@@ -2033,7 +1563,5 @@ function registerServiceWorker() {
 
 </script>
 
-
 </body>
-
 </html>
