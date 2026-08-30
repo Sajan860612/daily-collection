@@ -3,232 +3,216 @@
 
 <head>
 
-  <meta charset="UTF-8">
+<meta charset="UTF-8">
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
 
-  <meta
-    name="theme-color"
-    content="#166534"
-  >
+<meta name="theme-color"
+      content="#166534">
 
-  <meta
-    name="description"
-    content="Daily Collection Management"
-  >
+<meta name="description"
+      content="Daily Collection Management">
 
-  <link
-    rel="manifest"
-    href="./manifest.json"
-  >
+<link rel="manifest"
+      href="./manifest.json">
 
-  <title>Daily Collection</title>
+<title>Daily Collection</title>
 
+<style>
 
-  <style>
+* {
+  box-sizing: border-box;
+}
 
-    * {
-      box-sizing: border-box;
-    }
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f3f4f6;
+  color: #111827;
+}
 
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f3f4f6;
-      color: #111827;
-    }
+.header {
+  background: #166534;
+  color: white;
+  padding: 18px;
+  text-align: center;
+}
 
-    .header {
-      background: #166534;
-      color: white;
-      padding: 18px;
-      text-align: center;
-    }
+.header h2 {
+  margin: 0 0 8px;
+}
 
-    .header h2 {
-      margin: 0 0 8px;
-    }
+.container {
+  max-width: 600px;
+  margin: auto;
+  padding: 15px;
+}
 
-    .container {
-      max-width: 600px;
-      margin: auto;
-      padding: 15px;
-    }
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 18px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+}
 
-    .card {
-      background: white;
-      border-radius: 12px;
-      padding: 18px;
-      margin-bottom: 15px;
-      box-shadow: 0 2px 8px rgba(0,0,0,.08);
-    }
+label {
+  display: block;
+  font-weight: bold;
+  margin: 12px 0 6px;
+}
 
-    label {
-      display: block;
-      font-weight: bold;
-      margin: 12px 0 6px;
-    }
+input,
+textarea {
+  width: 100%;
+  padding: 13px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 16px;
+  background: white;
+  color: #111827;
+}
 
-    input,
-    textarea {
-      width: 100%;
-      padding: 13px;
-      border: 1px solid #d1d5db;
-      border-radius: 8px;
-      font-size: 16px;
-      background: white;
-      color: #111827;
-    }
+input:focus,
+textarea:focus {
+  outline: none;
+  border-color: #166534;
+  box-shadow: 0 0 0 2px rgba(22,101,52,.12);
+}
 
-    input:focus,
-    textarea:focus {
-      outline: none;
-      border-color: #166534;
-      box-shadow: 0 0 0 2px rgba(22,101,52,.12);
-    }
+textarea {
+  min-height: 90px;
+  resize: vertical;
+}
 
-    textarea {
-      min-height: 90px;
-      resize: vertical;
-    }
+button {
+  width: 100%;
+  padding: 14px;
+  margin-top: 12px;
+  border: 0;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
 
-    button {
-      width: 100%;
-      padding: 14px;
-      margin-top: 12px;
-      border: 0;
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-    }
+button:active {
+  transform: scale(.99);
+}
 
-    button:active {
-      transform: scale(.99);
-    }
+.search {
+  background: #2563eb;
+  color: white;
+}
 
-    .search {
-      background: #2563eb;
-      color: white;
-    }
+.save {
+  background: #16a34a;
+  color: white;
+}
 
-    .save {
-      background: #16a34a;
-      color: white;
-    }
+.info {
+  background: #f0fdf4;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 12px;
+}
 
-    .sync {
-      background: #7c3aed;
-      color: white;
-    }
+.info-row {
+  padding: 7px 0;
+}
 
-    .info {
-      background: #f0fdf4;
-      padding: 12px;
-      border-radius: 8px;
-      margin-top: 12px;
-    }
+.label {
+  font-weight: bold;
+}
 
-    .info-row {
-      padding: 7px 0;
-      word-break: break-word;
-    }
+.online {
+  color: #bbf7d0;
+}
 
-    .label {
-      font-weight: bold;
-    }
+.offline {
+  color: #fecaca;
+}
 
-    .online {
-      color: #bbf7d0;
-    }
+.message {
+  display: none;
+  padding: 12px;
+  margin-top: 10px;
+  border-radius: 8px;
+}
 
-    .offline {
-      color: #fecaca;
-    }
+.success {
+  display: block;
+  background: #dcfce7;
+  color: #166534;
+}
 
-    .message {
-      display: none;
-      padding: 12px;
-      margin-top: 10px;
-      border-radius: 8px;
-      line-height: 1.4;
-    }
+.error {
+  display: block;
+  background: #fee2e2;
+  color: #991b1b;
+}
 
-    .success {
-      display: block;
-      background: #dcfce7;
-      color: #166534;
-    }
+.customer {
+  display: none;
+}
 
-    .error {
-      display: block;
-      background: #fee2e2;
-      color: #991b1b;
-    }
+.pending {
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 10px;
+}
 
-    .customer {
-      display: none;
-    }
+.payment-for-box {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 10px;
+}
 
-    .pending {
-      background: #fff7ed;
-      border: 1px solid #fed7aa;
-      padding: 12px;
-      border-radius: 8px;
-      margin-top: 10px;
-    }
+.payment-for-help {
+  color: #1e40af;
+  font-size: 13px;
+  margin-top: 6px;
+  line-height: 1.4;
+}
 
-    .payment-for-box {
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
-      padding: 12px;
-      border-radius: 8px;
-      margin-top: 10px;
-    }
+.sync-status {
+  font-size: 13px;
+  margin-top: 8px;
+  color: #166534;
+}
 
-    .payment-for-help {
-      color: #1e40af;
-      font-size: 13px;
-      margin-top: 6px;
-      line-height: 1.4;
-    }
+.top-save {
+  margin-top: 0;
+  margin-bottom: 15px;
+}
 
-    .sync-status {
-      font-size: 13px;
-      margin-top: 8px;
-      color: #166534;
-      line-height: 1.4;
-    }
+.debug {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 8px;
+  word-break: break-word;
+}
 
-    .top-save {
-      margin-top: 0;
-      margin-bottom: 15px;
-    }
-
-    .loading {
-      opacity: .7;
-    }
-
-  </style>
+</style>
 
 </head>
 
-
 <body>
-
 
 <header class="header">
 
-  <h2>
-    Daily Collection
-  </h2>
+<h2>
+Daily Collection
+</h2>
 
-  <div id="connectionStatus">
-    Checking connection...
-  </div>
+<div id="connectionStatus">
+Checking connection...
+</div>
 
 </header>
 
@@ -236,259 +220,243 @@
 <main class="container">
 
 
-  <!-- STATUS -->
+<!-- STATUS -->
 
-  <div class="card">
+<div class="card">
 
-    <strong>
-      Customers on phone:
-    </strong>
+<strong>
+Customers on phone:
+</strong>
 
-    <span id="customerCount">
-      0
-    </span>
+<span id="customerCount">
+0
+</span>
 
 
-    <div class="pending">
+<div class="pending">
 
-      Pending collections:
+Pending collections:
 
-      <strong id="pendingCount">
-        0
-      </strong>
+<strong id="pendingCount">
+0
+</strong>
 
-    </div>
+</div>
 
 
-    <div
-      id="syncStatus"
-      class="sync-status"
-    >
-      Starting application...
-    </div>
+<div id="syncStatus"
+     class="sync-status">
 
+Starting synchronization...
 
-    <button
-      id="syncButton"
-      class="sync"
-      onclick="syncNow(true)"
-    >
-      🔄 Sync Customers
-    </button>
+</div>
 
-  </div>
+<div id="debug"
+     class="debug">
 
+Starting application...
 
-  <!-- SAVE -->
+</div>
 
-  <button
-    id="topSaveButton"
-    class="save top-save"
-    onclick="saveCollection()"
-  >
-    💰 Save Collection
-  </button>
+</div>
 
 
-  <!-- SEARCH -->
+<!-- SAVE -->
 
-  <div class="card">
+<button id="topSaveButton"
+        class="save top-save"
+        onclick="saveCollection()">
 
-    <label>
-      CRF Number
-    </label>
+💰 Save Collection
 
+</button>
 
-    <input
-      id="crfSearch"
-      type="text"
-      placeholder="Enter CRF number"
-      autocomplete="off"
-      autocapitalize="characters"
-    >
 
+<!-- SEARCH -->
 
-    <button
-      class="search"
-      onclick="searchCustomer()"
-    >
-      🔍 Search Customer
-    </button>
+<div class="card">
 
+<label>
+CRF Number
+</label>
 
-    <div
-      id="searchMessage"
-      class="message"
-    ></div>
+<input
+  id="crfSearch"
+  type="text"
+  placeholder="Enter CRF number"
+  autocomplete="off"
+>
 
-  </div>
+<button
+  class="search"
+  onclick="searchCustomer()">
 
+🔍 Search Customer
 
-  <!-- CUSTOMER -->
+</button>
 
-  <div
-    id="customerCard"
-    class="card customer"
-  >
+<div id="searchMessage"
+     class="message">
+</div>
 
-    <h3 id="customerName"></h3>
+</div>
 
 
-    <div class="info">
+<!-- CUSTOMER -->
 
+<div id="customerCard"
+     class="card customer">
 
-      <div class="info-row">
+<h3 id="customerName"></h3>
 
-        <span class="label">
-          CRF:
-        </span>
+<div class="info">
 
-        <span id="customerCRF"></span>
+<div class="info-row">
 
-      </div>
+<span class="label">
+CRF:
+</span>
 
+<span id="customerCRF"></span>
 
-      <div class="info-row">
+</div>
 
-        <span class="label">
-          Address:
-        </span>
 
-        <span id="customerAddress"></span>
+<div class="info-row">
 
-      </div>
+<span class="label">
+Address:
+</span>
 
+<span id="customerAddress"></span>
 
-      <div class="info-row">
+</div>
 
-        <span class="label">
-          Phone:
-        </span>
 
-        <span id="customerPhone"></span>
+<div class="info-row">
 
-      </div>
+<span class="label">
+Phone:
+</span>
 
+<span id="customerPhone"></span>
 
-      <div class="info-row">
+</div>
 
-        <span class="label">
-          Area:
-        </span>
 
-        <span id="customerArea"></span>
+<div class="info-row">
 
-      </div>
+<span class="label">
+Area:
+</span>
 
+<span id="customerArea"></span>
 
-      <div class="info-row">
+</div>
 
-        <span class="label">
-          Last Paid Date:
-        </span>
 
-        <span id="lastPaidDate">
-          No previous payment
-        </span>
+<div class="info-row">
 
-      </div>
+<span class="label">
+Last Paid Date:
+</span>
 
+<span id="lastPaidDate">
+No previous payment
+</span>
 
-      <div class="info-row">
+</div>
 
-        <span class="label">
-          PAID TILL:
-        </span>
 
-        <span id="paidThrough">
-          -
-        </span>
+<div class="info-row">
 
-      </div>
+<span class="label">
+PAID TILL:
+</span>
 
+<span id="paidThrough">
+-
+</span>
 
-    </div>
+</div>
 
+</div>
 
-    <!-- PAYMENT FOR -->
 
-    <div class="payment-for-box">
+<!-- PAYMENT FOR -->
 
-      <label style="margin-top: 0;">
-        Payment For
-      </label>
+<div class="payment-for-box">
 
+<label style="margin-top:0;">
+Payment For
+</label>
 
-      <input
-        id="paymentFor"
-        type="month"
-      >
+<input
+  id="paymentFor"
+  type="month"
+>
 
+<div class="payment-for-help">
 
-      <div class="payment-for-help">
+Select the month this collection is for.
 
-        Select the month this collection is for.
+<br>
 
-        <br>
+The collection date and payment-for month
+are stored separately.
 
-        The collection date and payment-for month
-        are stored separately.
+</div>
 
-      </div>
+</div>
 
-    </div>
 
+<!-- REMARKS -->
 
-    <!-- REMARKS -->
+<label>
+Remarks
+</label>
 
-    <label>
-      Remarks
-    </label>
+<textarea
+  id="remarks"
+  placeholder="Optional">
+</textarea>
 
 
-    <textarea
-      id="remarks"
-      placeholder="Optional"
-    ></textarea>
+<div id="saveMessage"
+     class="message">
+</div>
 
-
-    <div
-      id="saveMessage"
-      class="message"
-    ></div>
-
-  </div>
-
+</div>
 
 </main>
 
 
 <script>
 
-/************************************************************
- * GOOGLE APPS SCRIPT WEB APP URL
+/********************************************************
+ * GOOGLE APPS SCRIPT URL
  *
- * REPLACE THIS WITH YOUR REAL /exec URL.
- ************************************************************/
+ * PUT YOUR REAL DEPLOYED WEB APP URL HERE.
+ ********************************************************/
 
 const API_URL =
   'https://script.google.com/macros/s/AKfycbwLLhoQmLtoMPQBpvraumj5nNGqtZGFLo9VbTC077SxH5AKWpow5aOaLUDMpdA7dlXJQQ/exec';
 
 
-/************************************************************
+/********************************************************
  * SETTINGS
- ************************************************************/
+ ********************************************************/
 
-const AUTO_SYNC_INTERVAL = 10000;
+const AUTO_SYNC_INTERVAL = 5000;
 
 let syncInProgress = false;
 
 let currentCustomer = null;
 
 
-/************************************************************
+/********************************************************
  * LOCAL STORAGE KEYS
- ************************************************************/
+ ********************************************************/
 
 const CUSTOMER_KEY =
   'dailyCollectionCustomers';
@@ -503,16 +471,19 @@ const AGENT_KEY =
   'dailyCollectionAgent';
 
 
-/************************************************************
+/********************************************************
  * START APPLICATION
- ************************************************************/
+ ********************************************************/
 
 function startApplication() {
 
   console.log(
-    'Daily Collection JavaScript started.'
+    'Daily Collection application started'
   );
 
+  setDebug(
+    'JavaScript is running.'
+  );
 
   updateConnectionStatus();
 
@@ -520,62 +491,42 @@ function startApplication() {
 
   setDefaultPaymentFor();
 
-
-  document.getElementById(
-    'syncStatus'
-  ).innerText =
-    'Connecting to server...';
-
-
   /*
    * IMPORTANT:
    *
-   * We deliberately do NOT register the service worker
-   * in this version.
-   *
-   * This prevents an old service worker from serving
-   * your old Collection Entry / Amount / Payment Type
-   * page.
-   */
-
-
-  /*
-   * Download customers immediately.
-   *
-   * This happens even when there are zero pending
-   * collections.
+   * We intentionally do NOT depend on the
+   * service worker for the first synchronization.
    */
 
   if (navigator.onLine) {
 
-    syncNow(false);
+    setSyncStatus(
+      'Connecting to server...'
+    );
+
+    syncNow();
 
   } else {
 
-    document.getElementById(
-      'syncStatus'
-    ).innerText =
-      'Offline. Using customers saved on phone.';
+    setSyncStatus(
+      'Offline. Using customers saved on phone.'
+    );
 
   }
-
-
-  setInterval(function() {
-
-    if (navigator.onLine) {
-
-      syncNow(false);
-
-    }
-
-  }, AUTO_SYNC_INTERVAL);
 
 }
 
 
-/************************************************************
+/********************************************************
+ * START
+ ********************************************************/
+
+startApplication();
+
+
+/********************************************************
  * ONLINE / OFFLINE
- ************************************************************/
+ ********************************************************/
 
 window.addEventListener(
   'online',
@@ -583,7 +534,11 @@ window.addEventListener(
 
     updateConnectionStatus();
 
-    syncNow(false);
+    setSyncStatus(
+      'Internet restored. Synchronizing...'
+    );
+
+    syncNow();
 
   }
 );
@@ -595,13 +550,17 @@ window.addEventListener(
 
     updateConnectionStatus();
 
+    setSyncStatus(
+      'Offline. Data will remain saved on phone.'
+    );
+
   }
 );
 
 
-/************************************************************
+/********************************************************
  * CONNECTION STATUS
- ************************************************************/
+ ********************************************************/
 
 function updateConnectionStatus() {
 
@@ -610,13 +569,11 @@ function updateConnectionStatus() {
       'connectionStatus'
     );
 
-
   if (!element) {
 
     return;
 
   }
-
 
   if (navigator.onLine) {
 
@@ -639,24 +596,67 @@ function updateConnectionStatus() {
 }
 
 
-/************************************************************
+/********************************************************
+ * DEBUG
+ ********************************************************/
+
+function setDebug(message) {
+
+  const element =
+    document.getElementById(
+      'debug'
+    );
+
+  if (element) {
+
+    element.innerText =
+      message;
+
+  }
+
+}
+
+
+/********************************************************
+ * SYNC STATUS
+ ********************************************************/
+
+function setSyncStatus(message) {
+
+  const element =
+    document.getElementById(
+      'syncStatus'
+    );
+
+  if (element) {
+
+    element.innerText =
+      message;
+
+  }
+
+}
+
+
+/********************************************************
  * LOCAL STORAGE
- ************************************************************/
+ ********************************************************/
 
 function getCustomers() {
 
   try {
 
     return JSON.parse(
+
       localStorage.getItem(
         CUSTOMER_KEY
       ) || '[]'
+
     );
 
   } catch (error) {
 
     console.error(
-      'Customer storage error:',
       error
     );
 
@@ -672,15 +672,16 @@ function getPayments() {
   try {
 
     return JSON.parse(
+
       localStorage.getItem(
         PAYMENT_KEY
       ) || '{}'
+
     );
 
   } catch (error) {
 
     console.error(
-      'Payment storage error:',
       error
     );
 
@@ -696,15 +697,16 @@ function getPending() {
   try {
 
     return JSON.parse(
+
       localStorage.getItem(
         PENDING_KEY
       ) || '[]'
+
     );
 
   } catch (error) {
 
     console.error(
-      'Pending storage error:',
       error
     );
 
@@ -715,9 +717,9 @@ function getPending() {
 }
 
 
-/************************************************************
+/********************************************************
  * COUNTS
- ************************************************************/
+ ********************************************************/
 
 function updateCounts() {
 
@@ -726,12 +728,10 @@ function updateCounts() {
       'customerCount'
     );
 
-
   const pendingCount =
     document.getElementById(
       'pendingCount'
     );
-
 
   if (customerCount) {
 
@@ -739,7 +739,6 @@ function updateCounts() {
       getCustomers().length;
 
   }
-
 
   if (pendingCount) {
 
@@ -751,9 +750,9 @@ function updateCounts() {
 }
 
 
-/************************************************************
+/********************************************************
  * DEFAULT PAYMENT MONTH
- ************************************************************/
+ ********************************************************/
 
 function setDefaultPaymentFor() {
 
@@ -762,21 +761,17 @@ function setDefaultPaymentFor() {
       'paymentFor'
     );
 
-
   if (!input) {
 
     return;
 
   }
 
-
   const today =
     new Date();
 
-
   const year =
     today.getFullYear();
-
 
   const month =
     String(
@@ -786,16 +781,15 @@ function setDefaultPaymentFor() {
       '0'
     );
 
-
   input.value =
     year + '-' + month;
 
 }
 
 
-/************************************************************
+/********************************************************
  * SEARCH CUSTOMER
- ************************************************************/
+ ********************************************************/
 
 function searchCustomer() {
 
@@ -804,12 +798,10 @@ function searchCustomer() {
       'crfSearch'
     );
 
-
   const crf =
     input.value
       .trim()
       .toUpperCase();
-
 
   if (!crf) {
 
@@ -823,10 +815,8 @@ function searchCustomer() {
 
   }
 
-
   const customers =
     getCustomers();
-
 
   const customer =
     customers.find(
@@ -850,24 +840,15 @@ function searchCustomer() {
     ).style.display =
       'none';
 
-
     showMessage(
+
       'searchMessage',
-      'Customer not found on this phone. Please synchronize customer data.',
+
+      'Customer not found on this phone. Please wait for synchronization to complete.',
+
       false
+
     );
-
-
-    /*
-     * Try synchronization immediately.
-     */
-
-    if (navigator.onLine) {
-
-      syncNow(true);
-
-    }
-
 
     return;
 
@@ -877,11 +858,9 @@ function searchCustomer() {
   currentCustomer =
     customer;
 
-
   hideMessage(
     'searchMessage'
   );
-
 
   displayCustomer(
     customer
@@ -890,13 +869,11 @@ function searchCustomer() {
 }
 
 
-/************************************************************
+/********************************************************
  * DISPLAY CUSTOMER
- ************************************************************/
+ ********************************************************/
 
-function displayCustomer(
-  customer
-) {
+function displayCustomer(customer) {
 
   document.getElementById(
     'customerCard'
@@ -976,7 +953,6 @@ function displayCustomer(
     ).innerText =
       'No previous payment';
 
-
     document.getElementById(
       'paidThrough'
     ).innerText =
@@ -987,18 +963,22 @@ function displayCustomer(
 }
 
 
-/************************************************************
+/********************************************************
  * SAVE COLLECTION
- ************************************************************/
+ ********************************************************/
 
 function saveCollection() {
 
   if (!currentCustomer) {
 
     showMessage(
+
       'saveMessage',
+
       'Please search for a customer first.',
+
       false
+
     );
 
     return;
@@ -1013,9 +993,13 @@ function saveCollection() {
   if (!paymentForDate) {
 
     showMessage(
+
       'saveMessage',
+
       'Please select the month this collection is for.',
+
       false
+
     );
 
     return;
@@ -1063,17 +1047,24 @@ function saveCollection() {
 
 
   localStorage.setItem(
+
     PENDING_KEY,
+
     JSON.stringify(
       pending
     )
+
   );
 
 
   updateLocalPaymentSummary(
+
     currentCustomer.crf,
+
     transactionDate,
+
     paymentForDate
+
   );
 
 
@@ -1084,28 +1075,32 @@ function saveCollection() {
 
 
   showMessage(
+
     'saveMessage',
 
     navigator.onLine
+
       ? 'Collection saved. Synchronizing...'
+
       : 'Collection saved offline. It will synchronize when internet returns.',
 
     true
+
   );
 
 
   if (navigator.onLine) {
 
-    syncNow(true);
+    syncNow();
 
   }
 
 }
 
 
-/************************************************************
+/********************************************************
  * LOCAL PAYMENT SUMMARY
- ************************************************************/
+ ********************************************************/
 
 function updateLocalPaymentSummary(
   crf,
@@ -1115,7 +1110,6 @@ function updateLocalPaymentSummary(
 
   const payments =
     getPayments();
-
 
   const key =
     String(crf)
@@ -1145,8 +1139,7 @@ function updateLocalPaymentSummary(
 
 
     if (
-      existingDate >
-      paidThrough
+      existingDate > paidThrough
     ) {
 
       paidThrough =
@@ -1169,22 +1162,17 @@ function updateLocalPaymentSummary(
 
 
   localStorage.setItem(
+
     PAYMENT_KEY,
+
     JSON.stringify(
       payments
     )
+
   );
 
 
-  if (
-    currentCustomer &&
-    String(
-      currentCustomer.crf
-    )
-    .trim()
-    .toUpperCase()
-    === key
-  ) {
+  if (currentCustomer) {
 
     displayCustomer(
       currentCustomer
@@ -1195,24 +1183,21 @@ function updateLocalPaymentSummary(
 }
 
 
-/************************************************************
+/********************************************************
  * SYNCHRONIZATION
  *
  * IMPORTANT:
  *
- * This function ALWAYS sends a request to Apps Script,
- * even when pending.length === 0.
+ * This function now synchronizes EVEN WHEN THERE ARE
+ * ZERO PENDING COLLECTIONS.
  *
- * Therefore a new phone can download customers.
- ************************************************************/
+ * Therefore the phone can download all customers
+ * immediately after opening the application.
+ ********************************************************/
 
-async function syncNow(
-  manual
-) {
+async function syncNow() {
 
   if (!navigator.onLine) {
-
-    updateConnectionStatus();
 
     return;
 
@@ -1229,19 +1214,16 @@ async function syncNow(
   if (
     !API_URL ||
     API_URL ===
-    'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE'
+    'PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE'
   ) {
 
-    console.error(
+    setSyncStatus(
       'API URL is not configured.'
     );
 
-
-    document.getElementById(
-      'syncStatus'
-    ).innerText =
-      'API URL is not configured.';
-
+    setDebug(
+      'Please check API_URL in index.html.'
+    );
 
     return;
 
@@ -1252,38 +1234,24 @@ async function syncNow(
     true;
 
 
-  const syncButton =
-    document.getElementById(
-      'syncButton'
-    );
-
-
-  if (syncButton) {
-
-    syncButton.disabled =
-      true;
-
-    syncButton.classList.add(
-      'loading'
-    );
-
-  }
-
-
   try {
 
     const pending =
       getPending();
 
 
-    document.getElementById(
-      'syncStatus'
-    ).innerText =
-      'Synchronizing customers...';
+    setSyncStatus(
+      'Synchronizing customers...'
+    );
+
+
+    setDebug(
+      'Connecting to Google Apps Script...'
+    );
 
 
     console.log(
-      'Sending synchronization request.'
+      'Sync request started.'
     );
 
 
@@ -1323,16 +1291,10 @@ async function syncNow(
       );
 
 
-    console.log(
-      'HTTP response:',
-      response.status
-    );
-
-
     if (!response.ok) {
 
       throw new Error(
-        'Server returned HTTP ' +
+        'HTTP ' +
         response.status
       );
 
@@ -1344,14 +1306,12 @@ async function syncNow(
 
 
     console.log(
-      'Server response:',
+      'Sync response:',
       result
     );
 
 
-    if (
-      !result
-    ) {
+    if (!result) {
 
       throw new Error(
         'Empty response from server.'
@@ -1360,14 +1320,12 @@ async function syncNow(
     }
 
 
-    if (
-      !result.success
-    ) {
+    if (!result.success) {
 
       throw new Error(
 
         result.message ||
-        'Synchronization failed.'
+        'Server synchronization failed.'
 
       );
 
@@ -1394,24 +1352,15 @@ async function syncNow(
 
       );
 
-
-      console.log(
-
-        'Customers downloaded:',
-        result.customers.length
-
-      );
-
     }
 
 
     /******************************************************
-     * SAVE PAYMENT SUMMARY
+     * SAVE PAYMENTS
      ******************************************************/
 
     if (
-      result.payments &&
-      typeof result.payments === 'object'
+      result.payments
     ) {
 
       localStorage.setItem(
@@ -1428,7 +1377,7 @@ async function syncNow(
 
 
     /******************************************************
-     * REMOVE SUCCESSFULLY SYNCED COLLECTIONS
+     * REMOVE SUCCESSFULLY SYNCED TRANSACTIONS
      ******************************************************/
 
     const syncedIds =
@@ -1437,7 +1386,9 @@ async function syncNow(
         Array.isArray(
           result.syncedIds
         )
+
           ? result.syncedIds
+
           : []
 
       );
@@ -1445,6 +1396,7 @@ async function syncNow(
 
     const remaining =
       pending.filter(
+
         function(item) {
 
           return !syncedIds.has(
@@ -1452,6 +1404,7 @@ async function syncNow(
           );
 
         }
+
       );
 
 
@@ -1467,7 +1420,7 @@ async function syncNow(
 
 
     /******************************************************
-     * UPDATE SCREEN
+     * UPDATE COUNTS
      ******************************************************/
 
     updateCounts();
@@ -1477,9 +1430,7 @@ async function syncNow(
      * REFRESH CURRENT CUSTOMER
      ******************************************************/
 
-    if (
-      currentCustomer
-    ) {
+    if (currentCustomer) {
 
       const customers =
         getCustomers();
@@ -1487,6 +1438,7 @@ async function syncNow(
 
       const updated =
         customers.find(
+
           function(item) {
 
             return String(
@@ -1502,6 +1454,7 @@ async function syncNow(
             .toUpperCase();
 
           }
+
         );
 
 
@@ -1520,7 +1473,7 @@ async function syncNow(
 
 
     /******************************************************
-     * STATUS
+     * SUCCESS
      ******************************************************/
 
     const customerTotal =
@@ -1531,33 +1484,22 @@ async function syncNow(
       getPending().length;
 
 
-    document.getElementById(
-      'syncStatus'
-    ).innerText =
+    setSyncStatus(
 
-      'Synchronized successfully. ' +
+      'Last synchronized: ' +
+      new Date().toLocaleTimeString()
+
+    );
+
+
+    setDebug(
+
       customerTotal +
-      ' customers on phone. ' +
+      ' customer(s) downloaded. ' +
       pendingTotal +
-      ' pending collection(s).';
+      ' collection(s) pending.'
 
-
-    if (
-      manual
-    ) {
-
-      showMessage(
-
-        'searchMessage',
-
-        customerTotal +
-        ' customers synchronized successfully.',
-
-        true
-
-      );
-
-    }
+    );
 
 
     console.log(
@@ -1573,33 +1515,15 @@ async function syncNow(
     );
 
 
-    updateCounts();
+    setSyncStatus(
+      'Synchronization failed. Retrying automatically...'
+    );
 
 
-    document.getElementById(
-      'syncStatus'
-    ).innerText =
-
-      'Synchronization failed: ' +
-      error.message;
-
-
-    if (
-      manual
-    ) {
-
-      showMessage(
-
-        'searchMessage',
-
-        'Synchronization failed: ' +
-        error.message,
-
-        false
-
-      );
-
-    }
+    setDebug(
+      'Error: ' +
+      error.message
+    );
 
 
   } finally {
@@ -1607,26 +1531,35 @@ async function syncNow(
     syncInProgress =
       false;
 
-
-    if (syncButton) {
-
-      syncButton.disabled =
-        false;
-
-      syncButton.classList.remove(
-        'loading'
-      );
-
-    }
-
   }
 
 }
 
 
-/************************************************************
- * AGENT
- ************************************************************/
+/********************************************************
+ * AUTOMATIC SYNC
+ ********************************************************/
+
+setInterval(
+
+  function() {
+
+    if (navigator.onLine) {
+
+      syncNow();
+
+    }
+
+  },
+
+  AUTO_SYNC_INTERVAL
+
+);
+
+
+/********************************************************
+ * GET AGENT
+ ********************************************************/
 
 function getAgent() {
 
@@ -1647,30 +1580,32 @@ function getAgent() {
       agent.agentId
     ) {
 
-      return String(
-        agent.agentId
-      ).trim();
+      return agent.agentId;
 
     }
 
   } catch (error) {
 
     console.error(
-      'Agent storage error:',
       error
     );
 
   }
 
 
+  /*
+   * Your users sheet contains AG001,
+   * so use AG001 by default.
+   */
+
   return 'AG001';
 
 }
 
 
-/************************************************************
+/********************************************************
  * TRANSACTION ID
- ************************************************************/
+ ********************************************************/
 
 function createTransactionId() {
 
@@ -1691,9 +1626,9 @@ function createTransactionId() {
 }
 
 
-/************************************************************
+/********************************************************
  * PAYMENT-FOR DATE
- ************************************************************/
+ ********************************************************/
 
 function getPaymentForDate() {
 
@@ -1701,13 +1636,6 @@ function getPaymentForDate() {
     document.getElementById(
       'paymentFor'
     );
-
-
-  if (!input) {
-
-    return null;
-
-  }
 
 
   const value =
@@ -1735,19 +1663,16 @@ function getPaymentForDate() {
 
 
   const year =
-    Number(
-      parts[0]
-    );
+    Number(parts[0]);
 
 
   const month =
-    Number(
-      parts[1]
-    );
+    Number(parts[1]);
 
 
   if (
     !year ||
+    !month ||
     month < 1 ||
     month > 12
   ) {
@@ -1766,18 +1691,14 @@ function getPaymentForDate() {
 }
 
 
-/************************************************************
- * DATE FORMAT
- ************************************************************/
+/********************************************************
+ * FORMAT DATE
+ ********************************************************/
 
-function formatDate(
-  date
-) {
+function formatDate(date) {
 
   const d =
-    new Date(
-      date
-    );
+    new Date(date);
 
 
   if (
@@ -1813,11 +1734,7 @@ function formatDate(
 
     String(
       d.getDate()
-    )
-    .padStart(
-      2,
-      '0'
-    ) +
+    ).padStart(2, '0') +
 
     ' ' +
 
@@ -1834,9 +1751,11 @@ function formatDate(
 }
 
 
-function formatDisplayDate(
-  value
-) {
+/********************************************************
+ * DISPLAY DATE
+ ********************************************************/
+
+function formatDisplayDate(value) {
 
   if (!value) {
 
@@ -1846,9 +1765,7 @@ function formatDisplayDate(
 
 
   const date =
-    new Date(
-      value
-    );
+    new Date(value);
 
 
   if (
@@ -1869,34 +1786,25 @@ function formatDisplayDate(
 }
 
 
-/************************************************************
+/********************************************************
  * CLEAR FORM
- ************************************************************/
+ ********************************************************/
 
 function clearForm() {
 
-  const remarks =
-    document.getElementById(
-      'remarks'
-    );
-
-
-  if (remarks) {
-
-    remarks.value =
-      '';
-
-  }
-
+  document.getElementById(
+    'remarks'
+  ).value =
+    '';
 
   setDefaultPaymentFor();
 
 }
 
 
-/************************************************************
- * MESSAGES
- ************************************************************/
+/********************************************************
+ * MESSAGE
+ ********************************************************/
 
 function showMessage(
   id,
@@ -1932,9 +1840,7 @@ function showMessage(
 }
 
 
-function hideMessage(
-  id
-) {
+function hideMessage(id) {
 
   const element =
     document.getElementById(
@@ -1958,33 +1864,8 @@ function hideMessage(
 
 }
 
-
-/************************************************************
- * START
- *
- * DOMContentLoaded guarantees the HTML exists before
- * JavaScript starts touching the screen.
- ************************************************************/
-
-if (
-  document.readyState === 'loading'
-) {
-
-  document.addEventListener(
-    'DOMContentLoaded',
-    startApplication
-  );
-
-} else {
-
-  startApplication();
-
-}
-
 </script>
-
 
 </body>
 
 </html>
-S
