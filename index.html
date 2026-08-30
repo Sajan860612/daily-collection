@@ -22,10 +22,11 @@
 
   <link
     rel="manifest"
-    href="manifest.json"
+    href="./manifest.json"
   >
 
   <title>Daily Collection</title>
+
 
   <style>
 
@@ -72,7 +73,6 @@
     }
 
     input,
-    select,
     textarea {
       width: 100%;
       padding: 13px;
@@ -84,7 +84,6 @@
     }
 
     input:focus,
-    select:focus,
     textarea:focus {
       outline: none;
       border-color: #166534;
@@ -121,6 +120,11 @@
       color: white;
     }
 
+    .sync {
+      background: #7c3aed;
+      color: white;
+    }
+
     .info {
       background: #f0fdf4;
       padding: 12px;
@@ -130,6 +134,7 @@
 
     .info-row {
       padding: 7px 0;
+      word-break: break-word;
     }
 
     .label {
@@ -149,6 +154,7 @@
       padding: 12px;
       margin-top: 10px;
       border-radius: 8px;
+      line-height: 1.4;
     }
 
     .success {
@@ -194,6 +200,7 @@
       font-size: 13px;
       margin-top: 8px;
       color: #166534;
+      line-height: 1.4;
     }
 
     .top-save {
@@ -201,11 +208,17 @@
       margin-bottom: 15px;
     }
 
+    .loading {
+      opacity: .7;
+    }
+
   </style>
 
 </head>
 
+
 <body>
+
 
 <header class="header">
 
@@ -219,9 +232,11 @@
 
 </header>
 
+
 <main class="container">
 
-  <!-- STATUS CARD -->
+
+  <!-- STATUS -->
 
   <div class="card">
 
@@ -233,6 +248,7 @@
       0
     </span>
 
+
     <div class="pending">
 
       Pending collections:
@@ -243,17 +259,27 @@
 
     </div>
 
+
     <div
       id="syncStatus"
       class="sync-status"
     >
-      Automatic synchronization is enabled.
+      Starting application...
     </div>
+
+
+    <button
+      id="syncButton"
+      class="sync"
+      onclick="syncNow(true)"
+    >
+      🔄 Sync Customers
+    </button>
 
   </div>
 
 
-  <!-- SAVE BUTTON -->
+  <!-- SAVE -->
 
   <button
     id="topSaveButton"
@@ -272,12 +298,15 @@
       CRF Number
     </label>
 
+
     <input
       id="crfSearch"
       type="text"
       placeholder="Enter CRF number"
       autocomplete="off"
+      autocapitalize="characters"
     >
+
 
     <button
       class="search"
@@ -285,6 +314,7 @@
     >
       🔍 Search Customer
     </button>
+
 
     <div
       id="searchMessage"
@@ -303,7 +333,9 @@
 
     <h3 id="customerName"></h3>
 
+
     <div class="info">
+
 
       <div class="info-row">
 
@@ -315,6 +347,7 @@
 
       </div>
 
+
       <div class="info-row">
 
         <span class="label">
@@ -324,6 +357,7 @@
         <span id="customerAddress"></span>
 
       </div>
+
 
       <div class="info-row">
 
@@ -335,6 +369,7 @@
 
       </div>
 
+
       <div class="info-row">
 
         <span class="label">
@@ -344,6 +379,7 @@
         <span id="customerArea"></span>
 
       </div>
+
 
       <div class="info-row">
 
@@ -357,6 +393,7 @@
 
       </div>
 
+
       <div class="info-row">
 
         <span class="label">
@@ -369,6 +406,7 @@
 
       </div>
 
+
     </div>
 
 
@@ -380,10 +418,12 @@
         Payment For
       </label>
 
+
       <input
         id="paymentFor"
         type="month"
       >
+
 
       <div class="payment-for-help">
 
@@ -405,10 +445,12 @@
       Remarks
     </label>
 
+
     <textarea
       id="remarks"
       placeholder="Optional"
     ></textarea>
+
 
     <div
       id="saveMessage"
@@ -417,36 +459,36 @@
 
   </div>
 
+
 </main>
 
 
 <script>
 
-/********************************************************
- * GOOGLE APPS SCRIPT URL
- ********************************************************/
+/************************************************************
+ * GOOGLE APPS SCRIPT WEB APP URL
+ *
+ * REPLACE THIS WITH YOUR REAL /exec URL.
+ ************************************************************/
 
 const API_URL =
   'https://script.google.com/macros/s/AKfycbwLLhoQmLtoMPQBpvraumj5nNGqtZGFLo9VbTC077SxH5AKWpow5aOaLUDMpdA7dlXJQQ/exec';
 
 
-/********************************************************
- * AUTOMATIC SYNC
- ********************************************************/
+/************************************************************
+ * SETTINGS
+ ************************************************************/
 
-const AUTO_SYNC_INTERVAL =
-  5000;
+const AUTO_SYNC_INTERVAL = 10000;
 
-let syncInProgress =
-  false;
+let syncInProgress = false;
 
-let currentCustomer =
-  null;
+let currentCustomer = null;
 
 
-/********************************************************
+/************************************************************
  * LOCAL STORAGE KEYS
- ********************************************************/
+ ************************************************************/
 
 const CUSTOMER_KEY =
   'dailyCollectionCustomers';
@@ -461,15 +503,16 @@ const AGENT_KEY =
   'dailyCollectionAgent';
 
 
-/********************************************************
- * APPLICATION START
- ********************************************************/
+/************************************************************
+ * START APPLICATION
+ ************************************************************/
 
 function startApplication() {
 
   console.log(
-    'Daily Collection application started'
+    'Daily Collection JavaScript started.'
   );
+
 
   updateConnectionStatus();
 
@@ -477,31 +520,62 @@ function startApplication() {
 
   setDefaultPaymentFor();
 
-  registerServiceWorker();
+
+  document.getElementById(
+    'syncStatus'
+  ).innerText =
+    'Connecting to server...';
+
+
+  /*
+   * IMPORTANT:
+   *
+   * We deliberately do NOT register the service worker
+   * in this version.
+   *
+   * This prevents an old service worker from serving
+   * your old Collection Entry / Amount / Payment Type
+   * page.
+   */
+
+
+  /*
+   * Download customers immediately.
+   *
+   * This happens even when there are zero pending
+   * collections.
+   */
 
   if (navigator.onLine) {
-    syncNow();
+
+    syncNow(false);
+
+  } else {
+
+    document.getElementById(
+      'syncStatus'
+    ).innerText =
+      'Offline. Using customers saved on phone.';
+
   }
+
 
   setInterval(function() {
 
     if (navigator.onLine) {
-      syncNow();
+
+      syncNow(false);
+
     }
 
   }, AUTO_SYNC_INTERVAL);
 
 }
 
-console.log('JAVASCRIPT IS RUNNING');
 
-startApplication();
-
-
-
-/********************************************************
+/************************************************************
  * ONLINE / OFFLINE
- ********************************************************/
+ ************************************************************/
 
 window.addEventListener(
   'online',
@@ -509,7 +583,7 @@ window.addEventListener(
 
     updateConnectionStatus();
 
-    syncNow();
+    syncNow(false);
 
   }
 );
@@ -525,9 +599,9 @@ window.addEventListener(
 );
 
 
-/********************************************************
+/************************************************************
  * CONNECTION STATUS
- ********************************************************/
+ ************************************************************/
 
 function updateConnectionStatus() {
 
@@ -536,9 +610,13 @@ function updateConnectionStatus() {
       'connectionStatus'
     );
 
+
   if (!element) {
+
     return;
+
   }
+
 
   if (navigator.onLine) {
 
@@ -561,9 +639,9 @@ function updateConnectionStatus() {
 }
 
 
-/********************************************************
+/************************************************************
  * LOCAL STORAGE
- ********************************************************/
+ ************************************************************/
 
 function getCustomers() {
 
@@ -637,6 +715,10 @@ function getPending() {
 }
 
 
+/************************************************************
+ * COUNTS
+ ************************************************************/
+
 function updateCounts() {
 
   const customerCount =
@@ -644,10 +726,12 @@ function updateCounts() {
       'customerCount'
     );
 
+
   const pendingCount =
     document.getElementById(
       'pendingCount'
     );
+
 
   if (customerCount) {
 
@@ -655,6 +739,7 @@ function updateCounts() {
       getCustomers().length;
 
   }
+
 
   if (pendingCount) {
 
@@ -666,9 +751,9 @@ function updateCounts() {
 }
 
 
-/********************************************************
+/************************************************************
  * DEFAULT PAYMENT MONTH
- ********************************************************/
+ ************************************************************/
 
 function setDefaultPaymentFor() {
 
@@ -677,15 +762,21 @@ function setDefaultPaymentFor() {
       'paymentFor'
     );
 
+
   if (!input) {
+
     return;
+
   }
+
 
   const today =
     new Date();
 
+
   const year =
     today.getFullYear();
+
 
   const month =
     String(
@@ -695,25 +786,30 @@ function setDefaultPaymentFor() {
       '0'
     );
 
+
   input.value =
     year + '-' + month;
 
 }
 
 
-/********************************************************
+/************************************************************
  * SEARCH CUSTOMER
- ********************************************************/
+ ************************************************************/
 
 function searchCustomer() {
 
-  const crf =
+  const input =
     document.getElementById(
       'crfSearch'
-    )
-    .value
-    .trim()
-    .toUpperCase();
+    );
+
+
+  const crf =
+    input.value
+      .trim()
+      .toUpperCase();
+
 
   if (!crf) {
 
@@ -727,15 +823,17 @@ function searchCustomer() {
 
   }
 
+
   const customers =
     getCustomers();
+
 
   const customer =
     customers.find(
       function(item) {
 
         return String(
-          item.crf
+          item.crf || ''
         )
         .trim()
         .toUpperCase()
@@ -744,6 +842,7 @@ function searchCustomer() {
       }
     );
 
+
   if (!customer) {
 
     document.getElementById(
@@ -751,22 +850,38 @@ function searchCustomer() {
     ).style.display =
       'none';
 
+
     showMessage(
       'searchMessage',
-      'Customer not found on this phone. Automatic synchronization will update customer data when available.',
+      'Customer not found on this phone. Please synchronize customer data.',
       false
     );
+
+
+    /*
+     * Try synchronization immediately.
+     */
+
+    if (navigator.onLine) {
+
+      syncNow(true);
+
+    }
+
 
     return;
 
   }
 
+
   currentCustomer =
     customer;
+
 
   hideMessage(
     'searchMessage'
   );
+
 
   displayCustomer(
     customer
@@ -775,9 +890,9 @@ function searchCustomer() {
 }
 
 
-/********************************************************
+/************************************************************
  * DISPLAY CUSTOMER
- ********************************************************/
+ ************************************************************/
 
 function displayCustomer(
   customer
@@ -788,42 +903,52 @@ function displayCustomer(
   ).style.display =
     'block';
 
+
   document.getElementById(
     'customerName'
   ).innerText =
     customer.name || '';
+
 
   document.getElementById(
     'customerCRF'
   ).innerText =
     customer.crf || '';
 
+
   document.getElementById(
     'customerAddress'
   ).innerText =
     customer.address || '';
+
 
   document.getElementById(
     'customerPhone'
   ).innerText =
     customer.phone || '';
 
+
   document.getElementById(
     'customerArea'
   ).innerText =
     customer.area || '';
 
+
   const payments =
     getPayments();
 
+
+  const key =
+    String(
+      customer.crf || ''
+    )
+    .trim()
+    .toUpperCase();
+
+
   const payment =
-    payments[
-      String(
-        customer.crf
-      )
-      .trim()
-      .toUpperCase()
-    ];
+    payments[key];
+
 
   if (payment) {
 
@@ -834,6 +959,7 @@ function displayCustomer(
         payment.lastPaymentDate
       ) ||
       'No previous payment';
+
 
     document.getElementById(
       'paidThrough'
@@ -850,6 +976,7 @@ function displayCustomer(
     ).innerText =
       'No previous payment';
 
+
     document.getElementById(
       'paidThrough'
     ).innerText =
@@ -860,9 +987,9 @@ function displayCustomer(
 }
 
 
-/********************************************************
+/************************************************************
  * SAVE COLLECTION
- ********************************************************/
+ ************************************************************/
 
 function saveCollection() {
 
@@ -878,8 +1005,10 @@ function saveCollection() {
 
   }
 
+
   const paymentForDate =
     getPaymentForDate();
+
 
   if (!paymentForDate) {
 
@@ -893,6 +1022,7 @@ function saveCollection() {
 
   }
 
+
   const remarks =
     document.getElementById(
       'remarks'
@@ -900,11 +1030,14 @@ function saveCollection() {
     .value
     .trim();
 
+
   const transactionDate =
     new Date();
 
+
   const pending =
     getPending();
+
 
   pending.push({
 
@@ -928,6 +1061,7 @@ function saveCollection() {
 
   });
 
+
   localStorage.setItem(
     PENDING_KEY,
     JSON.stringify(
@@ -935,34 +1069,43 @@ function saveCollection() {
     )
   );
 
+
   updateLocalPaymentSummary(
     currentCustomer.crf,
     transactionDate,
     paymentForDate
   );
 
+
   updateCounts();
+
 
   clearForm();
 
+
   showMessage(
     'saveMessage',
+
     navigator.onLine
-      ? 'Collection saved. Automatic synchronization started.'
-      : 'Collection saved offline. It will synchronize automatically when internet returns.',
+      ? 'Collection saved. Synchronizing...'
+      : 'Collection saved offline. It will synchronize when internet returns.',
+
     true
   );
 
+
   if (navigator.onLine) {
-    syncNow();
+
+    syncNow(true);
+
   }
 
 }
 
 
-/********************************************************
+/************************************************************
  * LOCAL PAYMENT SUMMARY
- ********************************************************/
+ ************************************************************/
 
 function updateLocalPaymentSummary(
   crf,
@@ -973,20 +1116,22 @@ function updateLocalPaymentSummary(
   const payments =
     getPayments();
 
+
   const key =
-    String(
-      crf
-    )
-    .trim()
-    .toUpperCase();
+    String(crf)
+      .trim()
+      .toUpperCase();
+
 
   const existing =
     payments[key];
+
 
   let paidThrough =
     new Date(
       paymentForDate
     );
+
 
   if (
     existing &&
@@ -997,6 +1142,7 @@ function updateLocalPaymentSummary(
       new Date(
         existing.paidThrough
       );
+
 
     if (
       existingDate >
@@ -1010,6 +1156,7 @@ function updateLocalPaymentSummary(
 
   }
 
+
   payments[key] = {
 
     lastPaymentDate:
@@ -1020,12 +1167,14 @@ function updateLocalPaymentSummary(
 
   };
 
+
   localStorage.setItem(
     PAYMENT_KEY,
     JSON.stringify(
       payments
     )
   );
+
 
   if (
     currentCustomer &&
@@ -1046,11 +1195,20 @@ function updateLocalPaymentSummary(
 }
 
 
-/********************************************************
- * AUTOMATIC SYNCHRONIZATION
- ********************************************************/
+/************************************************************
+ * SYNCHRONIZATION
+ *
+ * IMPORTANT:
+ *
+ * This function ALWAYS sends a request to Apps Script,
+ * even when pending.length === 0.
+ *
+ * Therefore a new phone can download customers.
+ ************************************************************/
 
-async function syncNow() {
+async function syncNow(
+  manual
+) {
 
   if (!navigator.onLine) {
 
@@ -1075,41 +1233,58 @@ async function syncNow() {
   ) {
 
     console.error(
-      'Google Apps Script API URL has not been configured.'
+      'API URL is not configured.'
     );
+
 
     document.getElementById(
       'syncStatus'
     ).innerText =
       'API URL is not configured.';
 
+
     return;
 
   }
 
 
-  syncInProgress = true;
+  syncInProgress =
+    true;
+
+
+  const syncButton =
+    document.getElementById(
+      'syncButton'
+    );
+
+
+  if (syncButton) {
+
+    syncButton.disabled =
+      true;
+
+    syncButton.classList.add(
+      'loading'
+    );
+
+  }
 
 
   try {
 
-    console.log(
-      'Synchronization started...'
-    );
-
-
-    /*
-     * IMPORTANT:
-     *
-     * We now synchronize even when there are
-     * ZERO pending collections.
-     *
-     * This allows a new phone to download
-     * all customers from Google Sheets.
-     */
-
     const pending =
       getPending();
+
+
+    document.getElementById(
+      'syncStatus'
+    ).innerText =
+      'Synchronizing customers...';
+
+
+    console.log(
+      'Sending synchronization request.'
+    );
 
 
     const response =
@@ -1148,10 +1323,16 @@ async function syncNow() {
       );
 
 
+    console.log(
+      'HTTP response:',
+      response.status
+    );
+
+
     if (!response.ok) {
 
       throw new Error(
-        'HTTP ' +
+        'Server returned HTTP ' +
         response.status
       );
 
@@ -1163,24 +1344,30 @@ async function syncNow() {
 
 
     console.log(
-      'Sync response:',
+      'Server response:',
       result
     );
 
 
     if (
-      !result ||
+      !result
+    ) {
+
+      throw new Error(
+        'Empty response from server.'
+      );
+
+    }
+
+
+    if (
       !result.success
     ) {
 
       throw new Error(
 
-        result &&
-        result.message
-
-          ? result.message
-
-          : 'Synchronization failed.'
+        result.message ||
+        'Synchronization failed.'
 
       );
 
@@ -1188,7 +1375,7 @@ async function syncNow() {
 
 
     /******************************************************
-     * UPDATE CUSTOMERS
+     * SAVE CUSTOMERS
      ******************************************************/
 
     if (
@@ -1219,11 +1406,12 @@ async function syncNow() {
 
 
     /******************************************************
-     * UPDATE PAYMENT SUMMARY
+     * SAVE PAYMENT SUMMARY
      ******************************************************/
 
     if (
-      result.payments
+      result.payments &&
+      typeof result.payments === 'object'
     ) {
 
       localStorage.setItem(
@@ -1240,7 +1428,7 @@ async function syncNow() {
 
 
     /******************************************************
-     * PROCESS PENDING COLLECTIONS
+     * REMOVE SUCCESSFULLY SYNCED COLLECTIONS
      ******************************************************/
 
     const syncedIds =
@@ -1249,9 +1437,7 @@ async function syncNow() {
         Array.isArray(
           result.syncedIds
         )
-
           ? result.syncedIds
-
           : []
 
       );
@@ -1259,7 +1445,6 @@ async function syncNow() {
 
     const remaining =
       pending.filter(
-
         function(item) {
 
           return !syncedIds.has(
@@ -1267,7 +1452,6 @@ async function syncNow() {
           );
 
         }
-
       );
 
 
@@ -1283,7 +1467,7 @@ async function syncNow() {
 
 
     /******************************************************
-     * UPDATE COUNTS
+     * UPDATE SCREEN
      ******************************************************/
 
     updateCounts();
@@ -1303,268 +1487,23 @@ async function syncNow() {
 
       const updated =
         customers.find(
-
           function(item) {
 
             return String(
-              item.crf
+              item.crf || ''
             )
             .trim()
             .toUpperCase()
             ===
             String(
-              currentCustomer.crf
-            )
-            .trim()
-            .toUpperCase();
-
-          }
-
-        );
-
-
-      if (
-        updated
-      ) {
-
-        currentCustomer =
-          updated;
-
-        displayCustomer(
-          updated
-        );
-
-      }
-
-    }
-
-
-    /******************************************************
-     * SYNC STATUS
-     ******************************************************/
-
-    document.getElementById(
-      'syncStatus'
-    ).innerText =
-
-      'Last synchronized: ' +
-      new Date().toLocaleTimeString();
-
-
-    console.log(
-      'Synchronization completed successfully.'
-    );
-
-
-    /******************************************************
-     * SHOW FAILED TRANSACTIONS
-     ******************************************************/
-
-    if (
-      Array.isArray(
-        result.failed
-      ) &&
-      result.failed.length > 0
-    ) {
-
-      console.error(
-        'Failed collections:',
-        result.failed
-      );
-
-    }
-
-
-  } catch (error) {
-
-    console.error(
-      'Synchronization error:',
-      error
-    );
-
-
-    document.getElementById(
-      'syncStatus'
-    ).innerText =
-
-      'Synchronization failed. Will retry automatically.';
-
-
-  } finally {
-
-    syncInProgress =
-      false;
-
-  }
-
-}
-
-
-  if (syncInProgress) {
-    return;
-  }
-
-  if (
-    !API_URL ||
-    API_URL ===
-    'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE'
-  ) {
-
-    console.error(
-      'Google Apps Script API URL has not been configured.'
-    );
-
-    return;
-
-  }
-
-  const pending =
-    getPending();
-
-  if (pending.length === 0) {
-
-    updateCounts();
-
-    return;
-
-  }
-
-  syncInProgress =
-    true;
-
-  try {
-
-    console.log(
-      'Automatic sync started:',
-      new Date().toLocaleTimeString()
-    );
-
-    const response =
-      await fetch(
-        API_URL,
-        {
-          method: 'POST',
-
-          headers: {
-            'Content-Type':
-              'text/plain;charset=utf-8'
-          },
-
-          body:
-            JSON.stringify({
-              action: 'sync',
-              pending: pending,
-              agent: getAgent()
-            })
-        }
-      );
-
-    if (!response.ok) {
-
-      throw new Error(
-        'HTTP ' +
-        response.status
-      );
-
-    }
-
-    const result =
-      await response.json();
-
-    if (
-      !result ||
-      !result.success
-    ) {
-
-      throw new Error(
-        result &&
-        result.message
-          ? result.message
-          : 'Sync failed'
-      );
-
-    }
-
-    const syncedIds =
-      new Set(
-        Array.isArray(
-          result.syncedIds
-        )
-          ? result.syncedIds
-          : []
-      );
-
-    const remaining =
-      pending.filter(
-        function(item) {
-
-          return !syncedIds.has(
-            item.transactionId
-          );
-
-        }
-      );
-
-    localStorage.setItem(
-      PENDING_KEY,
-      JSON.stringify(
-        remaining
-      )
-    );
-
-    if (
-      Array.isArray(
-        result.customers
-      )
-    ) {
-
-      localStorage.setItem(
-        CUSTOMER_KEY,
-        JSON.stringify(
-          result.customers
-        )
-      );
-
-    }
-
-    if (
-      result.payments
-    ) {
-
-      localStorage.setItem(
-        PAYMENT_KEY,
-        JSON.stringify(
-          result.payments
-        )
-      );
-
-    }
-
-    updateCounts();
-
-    if (currentCustomer) {
-
-      const customers =
-        getCustomers();
-
-      const updated =
-        customers.find(
-          function(item) {
-
-            return String(
-              item.crf
-            )
-            .trim()
-            .toUpperCase()
-            ===
-            String(
-              currentCustomer.crf
+              currentCustomer.crf || ''
             )
             .trim()
             .toUpperCase();
 
           }
         );
+
 
       if (updated) {
 
@@ -1579,54 +1518,115 @@ async function syncNow() {
 
     }
 
+
+    /******************************************************
+     * STATUS
+     ******************************************************/
+
+    const customerTotal =
+      getCustomers().length;
+
+
+    const pendingTotal =
+      getPending().length;
+
+
     document.getElementById(
       'syncStatus'
     ).innerText =
-      'Last synchronized: ' +
-      new Date().toLocaleTimeString();
 
-    if (pending.length > 0) {
+      'Synchronized successfully. ' +
+      customerTotal +
+      ' customers on phone. ' +
+      pendingTotal +
+      ' pending collection(s).';
+
+
+    if (
+      manual
+    ) {
 
       showMessage(
-        'saveMessage',
 
-        remaining.length === 0
-          ? 'All collections synchronized.'
-          : remaining.length +
-            ' collection(s) still pending.',
+        'searchMessage',
+
+        customerTotal +
+        ' customers synchronized successfully.',
 
         true
+
       );
 
     }
 
+
+    console.log(
+      'Synchronization completed.'
+    );
+
+
   } catch (error) {
 
     console.error(
-      'Automatic sync error:',
+      'Synchronization error:',
       error
     );
 
+
     updateCounts();
+
 
     document.getElementById(
       'syncStatus'
     ).innerText =
-      'Waiting for next automatic synchronization...';
+
+      'Synchronization failed: ' +
+      error.message;
+
+
+    if (
+      manual
+    ) {
+
+      showMessage(
+
+        'searchMessage',
+
+        'Synchronization failed: ' +
+        error.message,
+
+        false
+
+      );
+
+    }
+
 
   } finally {
 
     syncInProgress =
       false;
 
+
+    if (syncButton) {
+
+      syncButton.disabled =
+        false;
+
+      syncButton.classList.remove(
+        'loading'
+      );
+
+    }
+
   }
 
 }
 
 
-/********************************************************
- * GET AGENT
- ********************************************************/
+/************************************************************
+ * AGENT
+ ************************************************************/
 
 function getAgent() {
 
@@ -1634,17 +1634,22 @@ function getAgent() {
 
     const agent =
       JSON.parse(
+
         localStorage.getItem(
           AGENT_KEY
         ) || 'null'
+
       );
+
 
     if (
       agent &&
       agent.agentId
     ) {
 
-      return agent.agentId;
+      return String(
+        agent.agentId
+      ).trim();
 
     }
 
@@ -1657,60 +1662,92 @@ function getAgent() {
 
   }
 
+
   return 'AG001';
 
 }
 
 
-/********************************************************
+/************************************************************
  * TRANSACTION ID
- ********************************************************/
+ ************************************************************/
 
 function createTransactionId() {
 
   return (
+
     'COL-' +
+
     Date.now().toString(36) +
+
     '-' +
+
     Math.random()
       .toString(36)
       .substring(2, 10)
+
   );
 
 }
 
 
-/********************************************************
- * GET PAYMENT-FOR DATE
- ********************************************************/
+/************************************************************
+ * PAYMENT-FOR DATE
+ ************************************************************/
 
 function getPaymentForDate() {
 
-  const value =
+  const input =
     document.getElementById(
       'paymentFor'
-    ).value;
+    );
+
+
+  if (!input) {
+
+    return null;
+
+  }
+
+
+  const value =
+    input.value;
+
 
   if (!value) {
+
     return null;
+
   }
+
 
   const parts =
     value.split('-');
 
-  if (parts.length !== 2) {
+
+  if (
+    parts.length !== 2
+  ) {
+
     return null;
+
   }
 
+
   const year =
-    Number(parts[0]);
+    Number(
+      parts[0]
+    );
+
 
   const month =
-    Number(parts[1]);
+    Number(
+      parts[1]
+    );
+
 
   if (
     !year ||
-    !month ||
     month < 1 ||
     month > 12
   ) {
@@ -1718,6 +1755,7 @@ function getPaymentForDate() {
     return null;
 
   }
+
 
   return new Date(
     year,
@@ -1728,14 +1766,19 @@ function getPaymentForDate() {
 }
 
 
-/********************************************************
- * DATE FUNCTIONS
- ********************************************************/
+/************************************************************
+ * DATE FORMAT
+ ************************************************************/
 
-function formatDate(date) {
+function formatDate(
+  date
+) {
 
   const d =
-    new Date(date);
+    new Date(
+      date
+    );
+
 
   if (
     isNaN(
@@ -1747,7 +1790,9 @@ function formatDate(date) {
 
   }
 
+
   const months = [
+
     'JANUARY',
     'FEBRUARY',
     'MARCH',
@@ -1760,32 +1805,51 @@ function formatDate(date) {
     'OCTOBER',
     'NOVEMBER',
     'DECEMBER'
+
   ];
 
+
   return (
+
     String(
       d.getDate()
-    ).padStart(
+    )
+    .padStart(
       2,
       '0'
     ) +
+
     ' ' +
-    months[d.getMonth()] +
+
+    months[
+      d.getMonth()
+    ] +
+
     ' ' +
+
     d.getFullYear()
+
   );
 
 }
 
 
-function formatDisplayDate(value) {
+function formatDisplayDate(
+  value
+) {
 
   if (!value) {
+
     return '';
+
   }
 
+
   const date =
-    new Date(value);
+    new Date(
+      value
+    );
+
 
   if (
     isNaN(
@@ -1797,29 +1861,42 @@ function formatDisplayDate(value) {
 
   }
 
-  return formatDate(date);
+
+  return formatDate(
+    date
+  );
 
 }
 
 
-/********************************************************
- * FORM
- ********************************************************/
+/************************************************************
+ * CLEAR FORM
+ ************************************************************/
 
 function clearForm() {
 
-  document.getElementById(
-    'remarks'
-  ).value = '';
+  const remarks =
+    document.getElementById(
+      'remarks'
+    );
+
+
+  if (remarks) {
+
+    remarks.value =
+      '';
+
+  }
+
 
   setDefaultPaymentFor();
 
 }
 
 
-/********************************************************
- * MESSAGE
- ********************************************************/
+/************************************************************
+ * MESSAGES
+ ************************************************************/
 
 function showMessage(
   id,
@@ -1828,11 +1905,17 @@ function showMessage(
 ) {
 
   const element =
-    document.getElementById(id);
+    document.getElementById(
+      id
+    );
+
 
   if (!element) {
+
     return;
+
   }
+
 
   element.className =
     'message ' +
@@ -1842,23 +1925,33 @@ function showMessage(
         : 'error'
     );
 
+
   element.innerText =
     message;
 
 }
 
 
-function hideMessage(id) {
+function hideMessage(
+  id
+) {
 
   const element =
-    document.getElementById(id);
+    document.getElementById(
+      id
+    );
+
 
   if (!element) {
+
     return;
+
   }
+
 
   element.className =
     'message';
+
 
   element.innerText =
     '';
@@ -1866,45 +1959,32 @@ function hideMessage(id) {
 }
 
 
-/********************************************************
- * SERVICE WORKER
- ********************************************************/
+/************************************************************
+ * START
+ *
+ * DOMContentLoaded guarantees the HTML exists before
+ * JavaScript starts touching the screen.
+ ************************************************************/
 
-function registerServiceWorker() {
+if (
+  document.readyState === 'loading'
+) {
 
-  if (
-    'serviceWorker' in navigator
-  ) {
+  document.addEventListener(
+    'DOMContentLoaded',
+    startApplication
+  );
 
-    navigator.serviceWorker
-      .register(
-        'service-worker.js'
-      )
-      .then(
-        function() {
+} else {
 
-          console.log(
-            'Service worker registered.'
-          );
-
-        }
-      )
-      .catch(
-        function(error) {
-
-          console.log(
-            'Service worker registration failed:',
-            error
-          );
-
-        }
-      );
-
-  }
+  startApplication();
 
 }
 
 </script>
 
+
 </body>
+
 </html>
+S
