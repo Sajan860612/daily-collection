@@ -136,6 +136,18 @@
     }
 
 
+    /*
+     * SAVE BUTTON AT TOP
+     */
+
+    .top-save {
+      margin-top: 0;
+      margin-bottom: 15px;
+      font-size: 17px;
+      padding: 16px;
+    }
+
+
     .info {
       background: #f0fdf4;
       padding: 12px;
@@ -286,7 +298,17 @@
   </div>
 
 
-  <!-- SEARCH -->
+  <!-- SAVE COLLECTION BUTTON -->
+
+  <button
+    class="save top-save"
+    onclick="saveCollection()"
+  >
+    💰 Save Collection
+  </button>
+
+
+  <!-- CRF SEARCH -->
 
   <div class="card">
 
@@ -321,13 +343,12 @@
   </div>
 
 
-  <!-- CUSTOMER -->
+  <!-- CUSTOMER DETAILS -->
 
   <div
     id="customerCard"
     class="card customer"
   >
-
 
     <h3 id="customerName"></h3>
 
@@ -335,15 +356,7 @@
     <div class="info">
 
 
-      <div class="info-row">
-
-        <span class="label">
-          Customer ID:
-        </span>
-
-        <span id="customerId"></span>
-
-      </div>
+      <!-- CUSTOMER ID REMOVED -->
 
 
       <div class="info-row">
@@ -416,37 +429,26 @@
       </div>
 
 
-      <div class="info-row">
-
-        <span class="label">
-          Last Amount:
-        </span>
-
-        ₹<span id="lastAmount">
-          0
-        </span>
-
-      </div>
+      <!-- LAST AMOUNT REMOVED -->
 
 
-      <div class="info-row">
-
-        <span class="label">
-          Last Payment Type:
-        </span>
-
-        <span id="lastPaymentType">
-          -
-        </span>
-
-      </div>
+      <!-- LAST PAYMENT TYPE REMOVED -->
 
 
     </div>
 
+  </div>
+
+
+  <!-- COLLECTION ENTRY -->
+
+  <div
+    id="collectionCard"
+    class="card customer"
+  >
 
     <h3>
-      Enter Collection
+      Collection Entry
     </h3>
 
 
@@ -525,7 +527,6 @@
       class="hidden"
     >
 
-
       <label>
         Number of Months
       </label>
@@ -580,7 +581,6 @@
 
       </div>
 
-
     </div>
 
 
@@ -597,23 +597,10 @@
     ></textarea>
 
 
-    <!-- SAVE -->
-
-    <button
-      class="save"
-      onclick="saveCollection()"
-    >
-
-      💰 Save Collection
-
-    </button>
-
-
     <div
       id="saveMessage"
       class="message"
     ></div>
-
 
   </div>
 
@@ -626,9 +613,6 @@
 
 /********************************************************
  * GOOGLE APPS SCRIPT URL
- *
- * IMPORTANT:
- * Replace this with your actual Apps Script Web App URL.
  ********************************************************/
 
 const API_URL =
@@ -694,10 +678,6 @@ function startApplication() {
   registerServiceWorker();
 
 
-  /*
-   * Sync immediately when application starts.
-   */
-
   if (
     navigator.onLine
   ) {
@@ -706,10 +686,6 @@ function startApplication() {
 
   }
 
-
-  /*
-   * Automatic synchronization every 5 seconds.
-   */
 
   setInterval(
 
@@ -732,10 +708,6 @@ function startApplication() {
 }
 
 
-/*
- * Start immediately.
- */
-
 startApplication();
 
 
@@ -748,12 +720,6 @@ window.addEventListener(
   function() {
 
     updateConnectionStatus();
-
-
-    /*
-     * Internet returned.
-     * Synchronize immediately.
-     */
 
     syncNow();
 
@@ -946,13 +912,6 @@ function setDefaultPaymentFor() {
   }
 
 
-  /*
-   * Default to the current month.
-   *
-   * Example:
-   * August 30, 2026 -> 2026-08
-   */
-
   const today =
     new Date();
 
@@ -1037,6 +996,12 @@ function searchCustomer() {
       'none';
 
 
+    document.getElementById(
+      'collectionCard'
+    ).style.display =
+      'none';
+
+
     showMessage(
 
       'searchMessage',
@@ -1083,9 +1048,14 @@ function displayCustomer(
 
 
   document.getElementById(
-    'customerId'
-  ).innerText =
-    customer.customerId || '';
+    'collectionCard'
+  ).style.display =
+    'block';
+
+
+  /*
+   * Customer ID removed.
+   */
 
 
   document.getElementById(
@@ -1153,20 +1123,6 @@ function displayCustomer(
       ) ||
       '-';
 
-
-    document.getElementById(
-      'lastAmount'
-    ).innerText =
-      payment.lastPaymentAmount ||
-      0;
-
-
-    document.getElementById(
-      'lastPaymentType'
-    ).innerText =
-      payment.lastPaymentType ||
-      '-';
-
   } else {
 
     document.getElementById(
@@ -1177,18 +1133,6 @@ function displayCustomer(
 
     document.getElementById(
       'paidThrough'
-    ).innerText =
-      '-';
-
-
-    document.getElementById(
-      'lastAmount'
-    ).innerText =
-      '0';
-
-
-    document.getElementById(
-      'lastPaymentType'
     ).innerText =
       '-';
 
@@ -1259,14 +1203,6 @@ function getPaymentForDate() {
   }
 
 
-  /*
-   * HTML month input gives:
-   *
-   * YYYY-MM
-   *
-   * We use day 1 internally.
-   */
-
   const parts =
     value.split('-');
 
@@ -1319,19 +1255,37 @@ function getPaymentForDate() {
 
 function calculateAdvance() {
 
+  const amountElement =
+    document.getElementById(
+      'amount'
+    );
+
+
+  const monthsElement =
+    document.getElementById(
+      'months'
+    );
+
+
+  if (
+    !amountElement ||
+    !monthsElement
+  ) {
+
+    return;
+
+  }
+
+
   const amount =
     Number(
-      document.getElementById(
-        'amount'
-      ).value
+      amountElement.value
     ) || 0;
 
 
   const months =
     Number(
-      document.getElementById(
-        'months'
-      ).value
+      monthsElement.value
     ) || 1;
 
 
@@ -1462,10 +1416,6 @@ function saveCollection() {
     ).value;
 
 
-  /*
-   * Get the month the payment is for.
-   */
-
   const paymentForDate =
     getPaymentForDate();
 
@@ -1535,11 +1485,6 @@ function saveCollection() {
     .trim();
 
 
-  /*
-   * THIS is the actual date the customer
-   * gave the money.
-   */
-
   const transactionDate =
     new Date();
 
@@ -1548,9 +1493,9 @@ function saveCollection() {
     getPending();
 
 
-  /******************************************************
+  /*
    * REGULAR PAYMENT
-   ******************************************************/
+   */
 
   if (
     type === 'Regular'
@@ -1561,22 +1506,8 @@ function saveCollection() {
       transactionId:
         createTransactionId(),
 
-      /*
-       * Actual payment date.
-       *
-       * Example:
-       * Customer pays on 30 August.
-       */
-
       transactionDate:
         transactionDate.toISOString(),
-
-      /*
-       * Month the payment belongs to.
-       *
-       * Example:
-       * Payment made in August but for April.
-       */
 
       coveredDate:
         paymentForDate.toISOString(),
@@ -1601,9 +1532,9 @@ function saveCollection() {
   }
 
 
-  /******************************************************
+  /*
    * ADVANCE PAYMENT
-   ******************************************************/
+   */
 
   if (
     type === 'Advance'
@@ -1618,22 +1549,6 @@ function saveCollection() {
       i < months;
       i++
     ) {
-
-      /*
-       * Advance starts from the selected
-       * Payment For month.
-       *
-       * Example:
-       *
-       * Payment Date = August
-       * Payment For = September
-       * Months = 3
-       *
-       * Creates:
-       * September
-       * October
-       * November
-       */
 
       const coveredDate =
         addMonths(
@@ -1650,16 +1565,8 @@ function saveCollection() {
         transactionId:
           createTransactionId(),
 
-        /*
-         * Actual date money was received.
-         */
-
         transactionDate:
           transactionDate.toISOString(),
-
-        /*
-         * Month this particular entry covers.
-         */
 
         coveredDate:
           coveredDate.toISOString(),
@@ -1697,9 +1604,9 @@ function saveCollection() {
   }
 
 
-  /******************************************************
+  /*
    * SAVE PENDING COLLECTIONS
-   ******************************************************/
+   */
 
   localStorage.setItem(
 
@@ -1712,9 +1619,9 @@ function saveCollection() {
   );
 
 
-  /******************************************************
+  /*
    * UPDATE LOCAL PAYMENT SUMMARY
-   ******************************************************/
+   */
 
   updateLocalPaymentSummary(
 
@@ -1753,10 +1660,6 @@ function saveCollection() {
 
   );
 
-
-  /*
-   * Try synchronization immediately.
-   */
 
   if (
     navigator.onLine
@@ -1805,12 +1708,6 @@ function updateLocalPaymentSummary(
     payments[key];
 
 
-  /*
-   * Paid-through is based on the month the
-   * payment is FOR, not the date the money
-   * was received.
-   */
-
   let paidThrough =
     new Date(
       paymentForDate
@@ -1832,11 +1729,6 @@ function updateLocalPaymentSummary(
 
   }
 
-
-  /*
-   * Keep the furthest paid-through date
-   * already stored locally.
-   */
 
   if (
     existing &&
@@ -1864,10 +1756,6 @@ function updateLocalPaymentSummary(
 
   payments[key] = {
 
-    /*
-     * When the money was actually received.
-     */
-
     lastPaymentDate:
       transactionDate.toISOString(),
 
@@ -1876,10 +1764,6 @@ function updateLocalPaymentSummary(
 
     lastPaymentType:
       type,
-
-    /*
-     * What month the payment covers.
-     */
 
     paidThrough:
       paidThrough.toISOString()
@@ -1923,10 +1807,6 @@ function updateLocalPaymentSummary(
 
 async function syncNow() {
 
-  /*
-   * Do nothing while offline.
-   */
-
   if (
     !navigator.onLine
   ) {
@@ -1938,11 +1818,6 @@ async function syncNow() {
   }
 
 
-  /*
-   * Don't start another sync while
-   * one is already running.
-   */
-
   if (
     syncInProgress
   ) {
@@ -1951,10 +1826,6 @@ async function syncNow() {
 
   }
 
-
-  /*
-   * Check API URL.
-   */
 
   if (
     !API_URL ||
@@ -2058,10 +1929,6 @@ async function syncNow() {
     }
 
 
-    /****************************************************
-     * REMOVE SUCCESSFULLY SYNCED TRANSACTIONS
-     ****************************************************/
-
     const syncedIds =
       new Set(
 
@@ -2101,10 +1968,6 @@ async function syncNow() {
     );
 
 
-    /****************************************************
-     * UPDATE CUSTOMERS
-     ****************************************************/
-
     if (
       Array.isArray(
         result.customers
@@ -2123,10 +1986,6 @@ async function syncNow() {
 
     }
 
-
-    /****************************************************
-     * UPDATE PAYMENT SUMMARY
-     ****************************************************/
 
     if (
       result.payments
@@ -2147,10 +2006,6 @@ async function syncNow() {
 
     updateCounts();
 
-
-    /****************************************************
-     * REFRESH CURRENT CUSTOMER
-     ****************************************************/
 
     if (
       currentCustomer
@@ -2198,21 +2053,12 @@ async function syncNow() {
     }
 
 
-    /*
-     * Update sync status.
-     */
-
     document.getElementById(
       'syncStatus'
     ).innerText =
       'Last synchronized: ' +
       new Date().toLocaleTimeString();
 
-
-    /*
-     * Show message only when there were
-     * pending collections.
-     */
 
     if (
       pending.length > 0
@@ -2250,13 +2096,6 @@ async function syncNow() {
     );
 
 
-    /*
-     * IMPORTANT:
-     *
-     * Never remove pending collections
-     * when synchronization fails.
-     */
-
     updateCounts();
 
 
@@ -2266,10 +2105,6 @@ async function syncNow() {
       'Waiting for next automatic synchronization...';
 
   } finally {
-
-    /*
-     * Release the lock.
-     */
 
     syncInProgress =
       false;
@@ -2622,10 +2457,6 @@ function clearForm() {
   ).value =
     'Regular';
 
-
-  /*
-   * Reset Payment For to current month.
-   */
 
   setDefaultPaymentFor();
 
