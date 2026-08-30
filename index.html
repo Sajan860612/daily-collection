@@ -1057,6 +1057,346 @@ async function syncNow() {
 
   }
 
+
+  if (syncInProgress) {
+
+    return;
+
+  }
+
+
+  if (
+    !API_URL ||
+    API_URL ===
+    'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE'
+  ) {
+
+    console.error(
+      'Google Apps Script API URL has not been configured.'
+    );
+
+    document.getElementById(
+      'syncStatus'
+    ).innerText =
+      'API URL is not configured.';
+
+    return;
+
+  }
+
+
+  syncInProgress = true;
+
+
+  try {
+
+    console.log(
+      'Synchronization started...'
+    );
+
+
+    /*
+     * IMPORTANT:
+     *
+     * We now synchronize even when there are
+     * ZERO pending collections.
+     *
+     * This allows a new phone to download
+     * all customers from Google Sheets.
+     */
+
+    const pending =
+      getPending();
+
+
+    const response =
+      await fetch(
+
+        API_URL,
+
+        {
+
+          method:
+            'POST',
+
+          headers: {
+
+            'Content-Type':
+              'text/plain;charset=utf-8'
+
+          },
+
+          body:
+            JSON.stringify({
+
+              action:
+                'sync',
+
+              pending:
+                pending,
+
+              agent:
+                getAgent()
+
+            })
+
+        }
+
+      );
+
+
+    if (!response.ok) {
+
+      throw new Error(
+        'HTTP ' +
+        response.status
+      );
+
+    }
+
+
+    const result =
+      await response.json();
+
+
+    console.log(
+      'Sync response:',
+      result
+    );
+
+
+    if (
+      !result ||
+      !result.success
+    ) {
+
+      throw new Error(
+
+        result &&
+        result.message
+
+          ? result.message
+
+          : 'Synchronization failed.'
+
+      );
+
+    }
+
+
+    /******************************************************
+     * UPDATE CUSTOMERS
+     ******************************************************/
+
+    if (
+      Array.isArray(
+        result.customers
+      )
+    ) {
+
+      localStorage.setItem(
+
+        CUSTOMER_KEY,
+
+        JSON.stringify(
+          result.customers
+        )
+
+      );
+
+
+      console.log(
+
+        'Customers downloaded:',
+        result.customers.length
+
+      );
+
+    }
+
+
+    /******************************************************
+     * UPDATE PAYMENT SUMMARY
+     ******************************************************/
+
+    if (
+      result.payments
+    ) {
+
+      localStorage.setItem(
+
+        PAYMENT_KEY,
+
+        JSON.stringify(
+          result.payments
+        )
+
+      );
+
+    }
+
+
+    /******************************************************
+     * PROCESS PENDING COLLECTIONS
+     ******************************************************/
+
+    const syncedIds =
+      new Set(
+
+        Array.isArray(
+          result.syncedIds
+        )
+
+          ? result.syncedIds
+
+          : []
+
+      );
+
+
+    const remaining =
+      pending.filter(
+
+        function(item) {
+
+          return !syncedIds.has(
+            item.transactionId
+          );
+
+        }
+
+      );
+
+
+    localStorage.setItem(
+
+      PENDING_KEY,
+
+      JSON.stringify(
+        remaining
+      )
+
+    );
+
+
+    /******************************************************
+     * UPDATE COUNTS
+     ******************************************************/
+
+    updateCounts();
+
+
+    /******************************************************
+     * REFRESH CURRENT CUSTOMER
+     ******************************************************/
+
+    if (
+      currentCustomer
+    ) {
+
+      const customers =
+        getCustomers();
+
+
+      const updated =
+        customers.find(
+
+          function(item) {
+
+            return String(
+              item.crf
+            )
+            .trim()
+            .toUpperCase()
+            ===
+            String(
+              currentCustomer.crf
+            )
+            .trim()
+            .toUpperCase();
+
+          }
+
+        );
+
+
+      if (
+        updated
+      ) {
+
+        currentCustomer =
+          updated;
+
+        displayCustomer(
+          updated
+        );
+
+      }
+
+    }
+
+
+    /******************************************************
+     * SYNC STATUS
+     ******************************************************/
+
+    document.getElementById(
+      'syncStatus'
+    ).innerText =
+
+      'Last synchronized: ' +
+      new Date().toLocaleTimeString();
+
+
+    console.log(
+      'Synchronization completed successfully.'
+    );
+
+
+    /******************************************************
+     * SHOW FAILED TRANSACTIONS
+     ******************************************************/
+
+    if (
+      Array.isArray(
+        result.failed
+      ) &&
+      result.failed.length > 0
+    ) {
+
+      console.error(
+        'Failed collections:',
+        result.failed
+      );
+
+    }
+
+
+  } catch (error) {
+
+    console.error(
+      'Synchronization error:',
+      error
+    );
+
+
+    document.getElementById(
+      'syncStatus'
+    ).innerText =
+
+      'Synchronization failed. Will retry automatically.';
+
+
+  } finally {
+
+    syncInProgress =
+      false;
+
+  }
+
+}
+
+
   if (syncInProgress) {
     return;
   }
