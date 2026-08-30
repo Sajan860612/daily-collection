@@ -1,10 +1,10 @@
 {
   "name": "Daily Collection",
   "short_name": "Collection",
-  "start_url": "./",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f3f4f6",
   "theme_color": "#166534",
-  "description": "Daily Customer Collection Management",
+  "description": "Daily Collection Management",
   "orientation": "portrait"
 }
