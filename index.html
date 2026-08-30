@@ -136,18 +136,6 @@
     }
 
 
-    /*
-     * SAVE BUTTON AT TOP
-     */
-
-    .top-save {
-      margin-top: 0;
-      margin-bottom: 15px;
-      font-size: 17px;
-      padding: 16px;
-    }
-
-
     .info {
       background: #f0fdf4;
       padding: 12px;
@@ -203,11 +191,6 @@
     }
 
 
-    .hidden {
-      display: none;
-    }
-
-
     .pending {
       background: #fff7ed;
       border: 1px solid #fed7aa;
@@ -238,6 +221,12 @@
       font-size: 13px;
       margin-top: 8px;
       color: #166534;
+    }
+
+
+    .top-save {
+      margin-top: 0;
+      margin-bottom: 15px;
     }
 
   </style>
@@ -298,17 +287,20 @@
   </div>
 
 
-  <!-- SAVE COLLECTION BUTTON -->
+  <!-- TOP SAVE BUTTON -->
 
   <button
+    id="topSaveButton"
     class="save top-save"
     onclick="saveCollection()"
   >
+
     💰 Save Collection
+
   </button>
 
 
-  <!-- CRF SEARCH -->
+  <!-- SEARCH -->
 
   <div class="card">
 
@@ -343,7 +335,7 @@
   </div>
 
 
-  <!-- CUSTOMER DETAILS -->
+  <!-- CUSTOMER -->
 
   <div
     id="customerCard"
@@ -354,9 +346,6 @@
 
 
     <div class="info">
-
-
-      <!-- CUSTOMER ID REMOVED -->
 
 
       <div class="info-row">
@@ -429,67 +418,7 @@
       </div>
 
 
-      <!-- LAST AMOUNT REMOVED -->
-
-
-      <!-- LAST PAYMENT TYPE REMOVED -->
-
-
     </div>
-
-  </div>
-
-
-  <!-- COLLECTION ENTRY -->
-
-  <div
-    id="collectionCard"
-    class="card customer"
-  >
-
-    <h3>
-      Collection Entry
-    </h3>
-
-
-    <!-- AMOUNT -->
-
-    <label>
-      Amount
-    </label>
-
-
-    <input
-      id="amount"
-      type="number"
-      min="1"
-      step="0.01"
-      placeholder="Enter amount"
-      oninput="calculateAdvance()"
-    >
-
-
-    <!-- PAYMENT TYPE -->
-
-    <label>
-      Payment Type
-    </label>
-
-
-    <select
-      id="paymentType"
-      onchange="paymentTypeChanged()"
-    >
-
-      <option value="Regular">
-        Regular
-      </option>
-
-      <option value="Advance">
-        Advance
-      </option>
-
-    </select>
 
 
     <!-- PAYMENT FOR -->
@@ -509,75 +438,12 @@
 
       <div class="payment-for-help">
 
-        Select the month this money is actually for.
+        Select the month this collection is for.
 
         <br>
 
-        The payment date and payment-for month are stored separately.
-
-      </div>
-
-    </div>
-
-
-    <!-- ADVANCE -->
-
-    <div
-      id="advanceBox"
-      class="hidden"
-    >
-
-      <label>
-        Number of Months
-      </label>
-
-
-      <input
-        id="months"
-        type="number"
-        min="1"
-        value="1"
-        oninput="calculateAdvance()"
-      >
-
-
-      <div class="info">
-
-        Monthly Amount:
-
-        ₹<strong id="monthlyAmount">
-          0
-        </strong>
-
-
-        <br><br>
-
-
-        Starting Month:
-
-        <strong id="advanceStartDate">
-          -
-        </strong>
-
-
-        <br><br>
-
-
-        Ending Month:
-
-        <strong id="advanceEndDate">
-          -
-        </strong>
-
-
-        <br><br>
-
-
-        Entries to be created:
-
-        <strong id="advanceEntryCount">
-          0
-        </strong>
+        The collection date and payment-for month
+        are stored separately.
 
       </div>
 
@@ -602,6 +468,7 @@
       class="message"
     ></div>
 
+
   </div>
 
 
@@ -613,6 +480,11 @@
 
 /********************************************************
  * GOOGLE APPS SCRIPT URL
+ *
+ * PUT YOUR APPS SCRIPT WEB APP URL HERE.
+ *
+ * THIS IS THE ONLY PLACE IN HTML WHERE THE API URL
+ * NEEDS TO BE ENTERED.
  ********************************************************/
 
 const API_URL =
@@ -629,6 +501,10 @@ const AUTO_SYNC_INTERVAL =
 
 let syncInProgress =
   false;
+
+
+let currentCustomer =
+  null;
 
 
 /********************************************************
@@ -649,10 +525,6 @@ const PENDING_KEY =
 
 const AGENT_KEY =
   'dailyCollectionAgent';
-
-
-let currentCustomer =
-  null;
 
 
 /********************************************************
@@ -933,9 +805,6 @@ function setDefaultPaymentFor() {
   input.value =
     year + '-' + month;
 
-
-  calculateAdvance();
-
 }
 
 
@@ -957,9 +826,13 @@ function searchCustomer() {
   if (!crf) {
 
     showMessage(
+
       'searchMessage',
+
       'Please enter a CRF number.',
+
       false
+
     );
 
     return;
@@ -992,12 +865,6 @@ function searchCustomer() {
 
     document.getElementById(
       'customerCard'
-    ).style.display =
-      'none';
-
-
-    document.getElementById(
-      'collectionCard'
     ).style.display =
       'none';
 
@@ -1045,17 +912,6 @@ function displayCustomer(
     'customerCard'
   ).style.display =
     'block';
-
-
-  document.getElementById(
-    'collectionCard'
-  ).style.display =
-    'block';
-
-
-  /*
-   * Customer ID removed.
-   */
 
 
   document.getElementById(
@@ -1138,229 +994,23 @@ function displayCustomer(
 
   }
 
-
-  calculateAdvance();
-
-}
-
-
-/********************************************************
- * PAYMENT TYPE
- ********************************************************/
-
-function paymentTypeChanged() {
-
-  const type =
-    document.getElementById(
-      'paymentType'
-    ).value;
-
-
-  const box =
-    document.getElementById(
-      'advanceBox'
-    );
-
-
-  if (
-    type === 'Advance'
-  ) {
-
-    box.classList.remove(
-      'hidden'
-    );
-
-  } else {
-
-    box.classList.add(
-      'hidden'
-    );
-
-  }
-
-
-  calculateAdvance();
-
-}
-
-
-/********************************************************
- * GET PAYMENT-FOR DATE
- ********************************************************/
-
-function getPaymentForDate() {
-
-  const value =
-    document.getElementById(
-      'paymentFor'
-    ).value;
-
-
-  if (!value) {
-
-    return null;
-
-  }
-
-
-  const parts =
-    value.split('-');
-
-
-  if (
-    parts.length !== 2
-  ) {
-
-    return null;
-
-  }
-
-
-  const year =
-    Number(
-      parts[0]
-    );
-
-
-  const month =
-    Number(
-      parts[1]
-    );
-
-
-  if (
-    !year ||
-    !month ||
-    month < 1 ||
-    month > 12
-  ) {
-
-    return null;
-
-  }
-
-
-  return new Date(
-    year,
-    month - 1,
-    1
-  );
-
-}
-
-
-/********************************************************
- * ADVANCE CALCULATION
- ********************************************************/
-
-function calculateAdvance() {
-
-  const amountElement =
-    document.getElementById(
-      'amount'
-    );
-
-
-  const monthsElement =
-    document.getElementById(
-      'months'
-    );
-
-
-  if (
-    !amountElement ||
-    !monthsElement
-  ) {
-
-    return;
-
-  }
-
-
-  const amount =
-    Number(
-      amountElement.value
-    ) || 0;
-
-
-  const months =
-    Number(
-      monthsElement.value
-    ) || 1;
-
-
-  const monthly =
-    months > 0
-      ? amount / months
-      : 0;
-
-
-  document.getElementById(
-    'monthlyAmount'
-  ).innerText =
-    monthly.toFixed(2);
-
-
-  const paymentForDate =
-    getPaymentForDate();
-
-
-  if (
-    !paymentForDate
-  ) {
-
-    document.getElementById(
-      'advanceStartDate'
-    ).innerText =
-      '-';
-
-
-    document.getElementById(
-      'advanceEndDate'
-    ).innerText =
-      '-';
-
-  } else {
-
-    document.getElementById(
-      'advanceStartDate'
-    ).innerText =
-      formatMonth(
-        paymentForDate
-      );
-
-
-    document.getElementById(
-      'advanceEndDate'
-    ).innerText =
-      formatMonth(
-
-        addMonths(
-
-          paymentForDate,
-
-          Math.max(
-            months - 1,
-            0
-          )
-
-        )
-
-      );
-
-  }
-
-
-  document.getElementById(
-    'advanceEntryCount'
-  ).innerText =
-    months;
-
 }
 
 
 /********************************************************
  * SAVE COLLECTION
+ *
+ * NO AMOUNT
+ * NO PAYMENT TYPE
+ *
+ * The collection contains:
+ *
+ * Transaction ID
+ * Transaction Date
+ * Covered Date
+ * CRF
+ * Agent
+ * Remarks
  ********************************************************/
 
 function saveCollection() {
@@ -1382,40 +1032,6 @@ function saveCollection() {
   }
 
 
-  const amount =
-    Number(
-      document.getElementById(
-        'amount'
-      ).value
-    );
-
-
-  if (
-    !amount ||
-    amount <= 0
-  ) {
-
-    showMessage(
-
-      'saveMessage',
-
-      'Please enter a valid amount.',
-
-      false
-
-    );
-
-    return;
-
-  }
-
-
-  const type =
-    document.getElementById(
-      'paymentType'
-    ).value;
-
-
   const paymentForDate =
     getPaymentForDate();
 
@@ -1428,51 +1044,13 @@ function saveCollection() {
 
       'saveMessage',
 
-      'Please select the month this payment is for.',
+      'Please select the month this collection is for.',
 
       false
 
     );
 
     return;
-
-  }
-
-
-  let months =
-    1;
-
-
-  if (
-    type === 'Advance'
-  ) {
-
-    months =
-      Number(
-        document.getElementById(
-          'months'
-        ).value
-      );
-
-
-    if (
-      !months ||
-      months < 1
-    ) {
-
-      showMessage(
-
-        'saveMessage',
-
-        'Please enter a valid number of months.',
-
-        false
-
-      );
-
-      return;
-
-    }
 
   }
 
@@ -1493,120 +1071,28 @@ function saveCollection() {
     getPending();
 
 
-  /*
-   * REGULAR PAYMENT
-   */
+  pending.push({
 
-  if (
-    type === 'Regular'
-  ) {
+    transactionId:
+      createTransactionId(),
 
-    pending.push({
+    transactionDate:
+      transactionDate.toISOString(),
 
-      transactionId:
-        createTransactionId(),
+    coveredDate:
+      paymentForDate.toISOString(),
 
-      transactionDate:
-        transactionDate.toISOString(),
+    crf:
+      currentCustomer.crf,
 
-      coveredDate:
-        paymentForDate.toISOString(),
+    agent:
+      getAgent(),
 
-      crf:
-        currentCustomer.crf,
+    remarks:
+      remarks
 
-      amount:
-        amount,
+  });
 
-      paymentType:
-        'Regular',
-
-      agent:
-        getAgent(),
-
-      remarks:
-        remarks
-
-    });
-
-  }
-
-
-  /*
-   * ADVANCE PAYMENT
-   */
-
-  if (
-    type === 'Advance'
-  ) {
-
-    const monthly =
-      amount / months;
-
-
-    for (
-      let i = 0;
-      i < months;
-      i++
-    ) {
-
-      const coveredDate =
-        addMonths(
-
-          paymentForDate,
-
-          i
-
-        );
-
-
-      pending.push({
-
-        transactionId:
-          createTransactionId(),
-
-        transactionDate:
-          transactionDate.toISOString(),
-
-        coveredDate:
-          coveredDate.toISOString(),
-
-        crf:
-          currentCustomer.crf,
-
-        amount:
-          Number(
-            monthly.toFixed(2)
-          ),
-
-        paymentType:
-          'Advance',
-
-        agent:
-          getAgent(),
-
-        remarks:
-          remarks +
-          (
-            remarks
-              ? ' | '
-              : ''
-          ) +
-          'Advance month ' +
-          (i + 1) +
-          ' of ' +
-          months
-
-      });
-
-    }
-
-  }
-
-
-  /*
-   * SAVE PENDING COLLECTIONS
-   */
 
   localStorage.setItem(
 
@@ -1620,7 +1106,7 @@ function saveCollection() {
 
 
   /*
-   * UPDATE LOCAL PAYMENT SUMMARY
+   * Update local payment information.
    */
 
   updateLocalPaymentSummary(
@@ -1629,13 +1115,7 @@ function saveCollection() {
 
     transactionDate,
 
-    paymentForDate,
-
-    amount,
-
-    type,
-
-    months
+    paymentForDate
 
   );
 
@@ -1682,13 +1162,7 @@ function updateLocalPaymentSummary(
 
   transactionDate,
 
-  paymentForDate,
-
-  amount,
-
-  type,
-
-  months
+  paymentForDate
 
 ) {
 
@@ -1712,22 +1186,6 @@ function updateLocalPaymentSummary(
     new Date(
       paymentForDate
     );
-
-
-  if (
-    type === 'Advance'
-  ) {
-
-    paidThrough =
-      addMonths(
-
-        paymentForDate,
-
-        months - 1
-
-      );
-
-  }
 
 
   if (
@@ -1758,12 +1216,6 @@ function updateLocalPaymentSummary(
 
     lastPaymentDate:
       transactionDate.toISOString(),
-
-    lastPaymentAmount:
-      amount,
-
-    lastPaymentType:
-      type,
 
     paidThrough:
       paidThrough.toISOString()
@@ -1829,8 +1281,8 @@ async function syncNow() {
 
   if (
     !API_URL ||
-    API_URL === 'API should come here' ||
-    API_URL === 'MYCODE'
+    API_URL ===
+    'PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE'
   ) {
 
     console.error(
@@ -1844,6 +1296,21 @@ async function syncNow() {
 
   const pending =
     getPending();
+
+
+  /*
+   * Nothing to synchronize.
+   */
+
+  if (
+    pending.length === 0
+  ) {
+
+    updateCounts();
+
+    return;
+
+  }
 
 
   syncInProgress =
@@ -1968,6 +1435,10 @@ async function syncNow() {
     );
 
 
+    /*
+     * Update customers received from Google Sheets.
+     */
+
     if (
       Array.isArray(
         result.customers
@@ -1986,6 +1457,10 @@ async function syncNow() {
 
     }
 
+
+    /*
+     * Update payment summary.
+     */
 
     if (
       result.payments
@@ -2006,6 +1481,10 @@ async function syncNow() {
 
     updateCounts();
 
+
+    /*
+     * Refresh current customer.
+     */
 
     if (
       currentCustomer
@@ -2181,6 +1660,71 @@ function createTransactionId() {
 
 
 /********************************************************
+ * GET PAYMENT-FOR DATE
+ ********************************************************/
+
+function getPaymentForDate() {
+
+  const value =
+    document.getElementById(
+      'paymentFor'
+    ).value;
+
+
+  if (!value) {
+
+    return null;
+
+  }
+
+
+  const parts =
+    value.split('-');
+
+
+  if (
+    parts.length !== 2
+  ) {
+
+    return null;
+
+  }
+
+
+  const year =
+    Number(
+      parts[0]
+    );
+
+
+  const month =
+    Number(
+      parts[1]
+    );
+
+
+  if (
+    !year ||
+    !month ||
+    month < 1 ||
+    month > 12
+  ) {
+
+    return null;
+
+  }
+
+
+  return new Date(
+    year,
+    month - 1,
+    1
+  );
+
+}
+
+
+/********************************************************
  * DATE FUNCTIONS
  ********************************************************/
 
@@ -2319,75 +1863,6 @@ function formatDate(
 
 
 /********************************************************
- * FORMAT MONTH
- ********************************************************/
-
-function formatMonth(
-  date
-) {
-
-  const d =
-    new Date(
-      date
-    );
-
-
-  if (
-    isNaN(
-      d.getTime()
-    )
-  ) {
-
-    return '-';
-
-  }
-
-
-  const months = [
-
-    'JANUARY',
-
-    'FEBRUARY',
-
-    'MARCH',
-
-    'APRIL',
-
-    'MAY',
-
-    'JUNE',
-
-    'JULY',
-
-    'AUGUST',
-
-    'SEPTEMBER',
-
-    'OCTOBER',
-
-    'NOVEMBER',
-
-    'DECEMBER'
-
-  ];
-
-
-  return (
-
-    months[
-      d.getMonth()
-    ] +
-
-    ' ' +
-
-    d.getFullYear()
-
-  );
-
-}
-
-
-/********************************************************
  * DISPLAY DATE
  ********************************************************/
 
@@ -2435,42 +1910,12 @@ function formatDisplayDate(
 function clearForm() {
 
   document.getElementById(
-    'amount'
-  ).value =
-    '';
-
-
-  document.getElementById(
-    'months'
-  ).value =
-    '1';
-
-
-  document.getElementById(
     'remarks'
   ).value =
     '';
 
 
-  document.getElementById(
-    'paymentType'
-  ).value =
-    'Regular';
-
-
   setDefaultPaymentFor();
-
-
-  document.getElementById(
-    'advanceBox'
-  )
-  .classList
-  .add(
-    'hidden'
-  );
-
-
-  calculateAdvance();
 
 }
 
