@@ -14,9 +14,6 @@
 <meta name="description"
       content="Daily Collection Management">
 
-<link rel="manifest"
-      href="./manifest.json">
-
 <title>Daily Collection</title>
 
 <style>
@@ -139,6 +136,7 @@ button:active {
   padding: 12px;
   margin-top: 10px;
   border-radius: 8px;
+  line-height: 1.4;
 }
 
 .success {
@@ -249,7 +247,6 @@ CRF Number
 >
 
 <button
-  type="button"
   class="search"
   onclick="searchCustomer()">
 
@@ -406,7 +403,6 @@ Remarks
 
 <button
   id="bottomSaveButton"
-  type="button"
   class="save bottom-save"
   onclick="saveCollection()">
 
@@ -416,16 +412,18 @@ Remarks
 
 </div>
 
+
 </main>
 
 
 <script>
 
 /********************************************************
- * GOOGLE APPS SCRIPT WEB APP URL
+ * GOOGLE APPS SCRIPT URL
  *
  * IMPORTANT:
- * Put your EXISTING correct deployed Web App URL here.
+ * Replace the text below with your REAL deployed
+ * Google Apps Script Web App URL.
  ********************************************************/
 
 const API_URL =
@@ -476,6 +474,7 @@ function startApplication() {
 
   setDefaultPaymentFor();
 
+
   if (navigator.onLine) {
 
     syncNow();
@@ -484,10 +483,6 @@ function startApplication() {
 
 }
 
-
-/********************************************************
- * START
- ********************************************************/
 
 startApplication();
 
@@ -530,10 +525,9 @@ function updateConnectionStatus() {
     );
 
   if (!element) {
-
     return;
-
   }
+
 
   if (navigator.onLine) {
 
@@ -575,7 +569,6 @@ function getCustomers() {
   } catch (error) {
 
     console.error(
-      'Customer storage error:',
       error
     );
 
@@ -601,7 +594,6 @@ function getPayments() {
   } catch (error) {
 
     console.error(
-      'Payment storage error:',
       error
     );
 
@@ -627,7 +619,6 @@ function getPending() {
   } catch (error) {
 
     console.error(
-      'Pending storage error:',
       error
     );
 
@@ -654,12 +645,14 @@ function updateCounts() {
       'pendingCount'
     );
 
+
   if (customerCount) {
 
     customerCount.innerText =
       getCustomers().length;
 
   }
+
 
   if (pendingCount) {
 
@@ -682,17 +675,19 @@ function setDefaultPaymentFor() {
       'paymentFor'
     );
 
+
   if (!input) {
-
     return;
-
   }
+
 
   const today =
     new Date();
 
+
   const year =
     today.getFullYear();
+
 
   const month =
     String(
@@ -701,6 +696,7 @@ function setDefaultPaymentFor() {
       2,
       '0'
     );
+
 
   input.value =
     year + '-' + month;
@@ -719,16 +715,12 @@ function searchCustomer() {
       'crfSearch'
     );
 
-  if (!input) {
-
-    return;
-
-  }
 
   const crf =
     input.value
       .trim()
       .toUpperCase();
+
 
   if (!crf) {
 
@@ -742,8 +734,10 @@ function searchCustomer() {
 
   }
 
+
   const customers =
     getCustomers();
+
 
   const customer =
     customers.find(
@@ -767,6 +761,7 @@ function searchCustomer() {
     ).style.display =
       'none';
 
+
     showMessage(
 
       'searchMessage',
@@ -777,15 +772,15 @@ function searchCustomer() {
 
     );
 
+
     /*
-     * Try synchronization once more.
+     * Try synchronization immediately.
      */
 
     if (navigator.onLine) {
-
       syncNow();
-
     }
+
 
     return;
 
@@ -795,9 +790,11 @@ function searchCustomer() {
   currentCustomer =
     customer;
 
+
   hideMessage(
     'searchMessage'
   );
+
 
   displayCustomer(
     customer
@@ -812,18 +809,9 @@ function searchCustomer() {
 
 function displayCustomer(customer) {
 
-  const card =
-    document.getElementById(
-      'customerCard'
-    );
-
-  if (!card) {
-
-    return;
-
-  }
-
-  card.style.display =
+  document.getElementById(
+    'customerCard'
+  ).style.display =
     'block';
 
 
@@ -899,6 +887,7 @@ function displayCustomer(customer) {
     ).innerText =
       'No previous payment';
 
+
     document.getElementById(
       'paidThrough'
     ).innerText =
@@ -953,24 +942,16 @@ function saveCollection() {
   }
 
 
-  const remarksElement =
+  const remarks =
     document.getElementById(
       'remarks'
-    );
-
-
-  const remarks =
-    remarksElement
-      ? remarksElement.value.trim()
-      : '';
+    )
+    .value
+    .trim();
 
 
   const transactionDate =
     new Date();
-
-
-  const pending =
-    getPending();
 
 
   const transaction = {
@@ -978,22 +959,53 @@ function saveCollection() {
     transactionId:
       createTransactionId(),
 
+
     transactionDate:
       transactionDate.toISOString(),
 
+
+    /*
+     * IMPORTANT:
+     *
+     * Send Payment For as a simple YYYY-MM-01
+     * string so timezone conversion cannot move
+     * it into the previous month.
+     */
+
     coveredDate:
-      paymentForDate.toISOString(),
+      paymentForDate.getFullYear() +
+      '-' +
+      String(
+        paymentForDate.getMonth() + 1
+      ).padStart(
+        2,
+        '0'
+      ) +
+      '-01',
+
 
     crf:
       currentCustomer.crf,
 
+
     agent:
       getAgent(),
+
 
     remarks:
       remarks
 
   };
+
+
+  console.log(
+    'NEW TRANSACTION:',
+    transaction
+  );
+
+
+  const pending =
+    getPending();
 
 
   pending.push(
@@ -1011,6 +1023,10 @@ function saveCollection() {
 
   );
 
+
+  /*
+   * Show payment immediately on phone.
+   */
 
   updateLocalPaymentSummary(
 
@@ -1035,7 +1051,7 @@ function saveCollection() {
 
     navigator.onLine
 
-      ? 'Collection saved. Synchronizing...'
+      ? 'Collection saved on phone. Synchronizing...'
 
       : 'Collection saved offline. It will synchronize when internet returns.',
 
@@ -1043,6 +1059,10 @@ function saveCollection() {
 
   );
 
+
+  /*
+   * Immediately synchronize.
+   */
 
   if (navigator.onLine) {
 
@@ -1095,6 +1115,9 @@ function updateLocalPaymentSummary(
 
 
     if (
+      !isNaN(
+        existingDate.getTime()
+      ) &&
       existingDate > paidThrough
     ) {
 
@@ -1110,6 +1133,7 @@ function updateLocalPaymentSummary(
 
     lastPaymentDate:
       transactionDate.toISOString(),
+
 
     paidThrough:
       paidThrough.toISOString()
@@ -1141,12 +1165,8 @@ function updateLocalPaymentSummary(
 
 /********************************************************
  * SYNCHRONIZATION
- ********************************************************/
-
-/********************************************************
- * SYNCHRONIZATION
  *
- * Sends pending collections to Google Apps Script.
+ * ONLY ONE syncNow() FUNCTION IN THIS HTML.
  ********************************************************/
 
 async function syncNow() {
@@ -1165,7 +1185,7 @@ async function syncNow() {
   if (syncInProgress) {
 
     console.log(
-      'Sync skipped: another sync is already running.'
+      'Sync skipped: another sync is running.'
     );
 
     return;
@@ -1176,18 +1196,12 @@ async function syncNow() {
   if (
     !API_URL ||
     API_URL.trim() === '' ||
-    API_URL === 'paste the url here' ||
-    API_URL === 'PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE'
+    API_URL === 'PASTE_YOUR_WEB_APP_URL_HERE' ||
+    API_URL === 'paste the url here'
   ) {
 
     console.error(
-      'API URL is not configured correctly.'
-    );
-
-    showMessage(
-      'saveMessage',
-      'Google Sheets URL is not configured.',
-      false
+      'API URL is not configured.'
     );
 
     return;
@@ -1195,7 +1209,8 @@ async function syncNow() {
   }
 
 
-  syncInProgress = true;
+  syncInProgress =
+    true;
 
 
   try {
@@ -1204,41 +1219,24 @@ async function syncNow() {
       getPending();
 
 
-    console.log(
-      'Pending transactions:',
-      pending
-    );
-
-
-    /*
-     * Nothing to send.
-     */
-
-    if (!pending.length) {
-
-      console.log(
-        'No pending transactions.'
-      );
-
-      syncInProgress = false;
-
-      return;
-
-    }
-
-
     const agent =
       getAgent();
 
 
     console.log(
-      'Agent:',
-      agent
+      'SYNC START',
+      {
+        pending: pending,
+        agent: agent
+      }
     );
 
 
     /*
-     * Send request.
+     * Send even when pending is empty.
+     *
+     * This downloads customers and payment
+     * information from Google Sheets.
      */
 
     const response =
@@ -1251,12 +1249,14 @@ async function syncNow() {
           method:
             'POST',
 
+
           headers: {
 
             'Content-Type':
               'text/plain;charset=utf-8'
 
           },
+
 
           body:
             JSON.stringify({
@@ -1298,7 +1298,7 @@ async function syncNow() {
 
 
     console.log(
-      'Raw server response:',
+      'SERVER RESPONSE:',
       responseText
     );
 
@@ -1322,63 +1322,23 @@ async function syncNow() {
           responseText
         );
 
-    } catch (parseError) {
-
-      console.error(
-        'JSON parse error:',
-        parseError
-      );
+    } catch (error) {
 
       throw new Error(
-        'Server returned invalid JSON: ' +
-        responseText.substring(0, 300)
+        'Invalid response from Google Apps Script.'
       );
 
     }
 
 
     console.log(
-      'Parsed server response:',
+      'SYNC RESULT:',
       result
     );
 
 
-    /*
-     * SERVER REJECTED THE SYNC
-     */
-
-    if (!result.success) {
-
-      const serverMessage =
-        result.message ||
-        'Server synchronization failed.';
-
-
-      console.error(
-        'SERVER SYNC FAILED:',
-        serverMessage
-      );
-
-
-      /*
-       * Keep the transaction on the phone.
-       * DO NOT delete pending data.
-       */
-
-      showMessage(
-        'saveMessage',
-        'Sync failed: ' + serverMessage,
-        false
-      );
-
-
-      return;
-
-    }
-
-
     /******************************************************
-     * SAVE CUSTOMERS FROM SERVER
+     * ALWAYS UPDATE CUSTOMERS FROM SERVER
      ******************************************************/
 
     if (
@@ -1397,33 +1357,19 @@ async function syncNow() {
 
       );
 
-    }
 
-
-    /******************************************************
-     * SAVE PAYMENT SUMMARY
-     ******************************************************/
-
-    if (
-      result.payments &&
-      typeof result.payments === 'object'
-    ) {
-
-      localStorage.setItem(
-
-        PAYMENT_KEY,
-
-        JSON.stringify(
-          result.payments
-        )
-
+      console.log(
+        'Customers downloaded:',
+        result.customers.length
       );
 
     }
 
 
     /******************************************************
-     * REMOVE ONLY SUCCESSFULLY SYNCED TRANSACTIONS
+     * ONLY UPDATE SERVER PAYMENT SUMMARY WHEN THERE
+     * ARE NO LOCAL PENDING TRANSACTIONS OR WHEN THE
+     * SERVER HAS SUCCESSFULLY ACCEPTED THEM.
      ******************************************************/
 
     const syncedIds =
@@ -1454,6 +1400,10 @@ async function syncNow() {
       );
 
 
+    /*
+     * Save remaining pending transactions.
+     */
+
     localStorage.setItem(
 
       PENDING_KEY,
@@ -1465,11 +1415,171 @@ async function syncNow() {
     );
 
 
+    updateCounts();
+
+
     /******************************************************
-     * UPDATE COUNTS
+     * PAYMENT SUMMARY
+     *
+     * If there are still pending transactions, merge
+     * server data with local pending data instead of
+     * allowing the old server data to erase the
+     * newly-entered payment.
      ******************************************************/
 
-    updateCounts();
+    if (
+      result.payments &&
+      typeof result.payments === 'object'
+    ) {
+
+      const serverPayments =
+        result.payments;
+
+
+      const localPayments =
+        getPayments();
+
+
+      /*
+       * Start with server data.
+       */
+
+      const mergedPayments =
+        Object.assign(
+          {},
+          serverPayments
+        );
+
+
+      /*
+       * Preserve local pending payments.
+       */
+
+      for (
+        let i = 0;
+        i < remaining.length;
+        i++
+      ) {
+
+        const item =
+          remaining[i];
+
+
+        const key =
+          String(
+            item.crf || ''
+          )
+          .trim()
+          .toUpperCase();
+
+
+        if (!key) {
+          continue;
+        }
+
+
+        const local =
+          localPayments[key];
+
+
+        if (!local) {
+          continue;
+        }
+
+
+        const server =
+          mergedPayments[key];
+
+
+        if (!server) {
+
+          mergedPayments[key] =
+            local;
+
+          continue;
+
+        }
+
+
+        const localTransactionDate =
+          new Date(
+            local.lastPaymentDate
+          );
+
+
+        const serverTransactionDate =
+          new Date(
+            server.lastPaymentDate
+          );
+
+
+        if (
+          !isNaN(
+            localTransactionDate.getTime()
+          )
+          &&
+          (
+            isNaN(
+              serverTransactionDate.getTime()
+            )
+            ||
+            localTransactionDate >
+            serverTransactionDate
+          )
+        ) {
+
+          server.lastPaymentDate =
+            local.lastPaymentDate;
+
+        }
+
+
+        const localPaidThrough =
+          new Date(
+            local.paidThrough
+          );
+
+
+        const serverPaidThrough =
+          new Date(
+            server.paidThrough
+          );
+
+
+        if (
+          !isNaN(
+            localPaidThrough.getTime()
+          )
+          &&
+          (
+            isNaN(
+              serverPaidThrough.getTime()
+            )
+            ||
+            localPaidThrough >
+            serverPaidThrough
+          )
+        ) {
+
+          server.paidThrough =
+            local.paidThrough;
+
+        }
+
+      }
+
+
+      localStorage.setItem(
+
+        PAYMENT_KEY,
+
+        JSON.stringify(
+          mergedPayments
+        )
+
+      );
+
+    }
 
 
     /******************************************************
@@ -1509,6 +1619,7 @@ async function syncNow() {
         currentCustomer =
           updated;
 
+
         displayCustomer(
           updated
         );
@@ -1518,15 +1629,94 @@ async function syncNow() {
     }
 
 
-    showMessage(
-      'saveMessage',
-      'Collection synchronized successfully.',
-      true
-    );
+    /******************************************************
+     * SERVER REPORTED FAILURE
+     ******************************************************/
+
+    if (!result.success) {
+
+      let message =
+        result.message ||
+        'Some data could not be synchronized.';
+
+
+      if (
+        Array.isArray(
+          result.failed
+        ) &&
+        result.failed.length > 0
+      ) {
+
+        const firstFailure =
+          result.failed[0];
+
+
+        message =
+          'Sync failed: ' +
+          (
+            firstFailure.message ||
+            message
+          );
+
+      }
+
+
+      console.error(
+        'SERVER SYNC FAILURE:',
+        result
+      );
+
+
+      showMessage(
+
+        'saveMessage',
+
+        message,
+
+        false
+
+      );
+
+
+      return;
+
+    }
+
+
+    /******************************************************
+     * SUCCESS
+     ******************************************************/
+
+    if (remaining.length === 0) {
+
+      showMessage(
+
+        'saveMessage',
+
+        'Collection synchronized successfully.',
+
+        true
+
+      );
+
+    } else {
+
+      showMessage(
+
+        'saveMessage',
+
+        remaining.length +
+        ' collection(s) still waiting to synchronize.',
+
+        false
+
+      );
+
+    }
 
 
     console.log(
-      'Synchronization completed successfully.'
+      'Synchronization completed.'
     );
 
 
@@ -1539,23 +1729,23 @@ async function syncNow() {
 
 
     /*
-     * VERY IMPORTANT:
-     *
-     * Do not remove the pending transaction
-     * when synchronization fails.
+     * DO NOT DELETE PENDING DATA.
      */
 
     showMessage(
 
       'saveMessage',
 
-      'Sync failed. Collection is still saved on this phone. ' +
-      (error.message || String(error)),
+      'Synchronization failed. ' +
+      'Collection is still saved on this phone. ' +
+      (
+        error.message ||
+        String(error)
+      ),
 
       false
 
     );
-
 
   } finally {
 
@@ -1565,6 +1755,7 @@ async function syncNow() {
   }
 
 }
+
 
 /********************************************************
  * AUTOMATIC SYNC
@@ -1617,18 +1808,11 @@ function getAgent() {
   } catch (error) {
 
     console.error(
-      'Agent storage error:',
       error
     );
 
   }
 
-
-  /*
-   * Default agent.
-   *
-   * Your users sheet contains AG001.
-   */
 
   return 'AG001';
 
@@ -1725,10 +1909,24 @@ function getPaymentForDate() {
   }
 
 
+  /*
+   * Noon prevents accidental timezone rollover.
+   */
+
   return new Date(
+
     year,
+
     month - 1,
-    1
+
+    1,
+
+    12,
+
+    0,
+
+    0
+
   );
 
 }
@@ -1896,18 +2094,10 @@ function formatDisplayDate(value) {
 
 function clearForm() {
 
-  const remarks =
-    document.getElementById(
-      'remarks'
-    );
-
-
-  if (remarks) {
-
-    remarks.value =
-      '';
-
-  }
+  document.getElementById(
+    'remarks'
+  ).value =
+    '';
 
 
   setDefaultPaymentFor();
