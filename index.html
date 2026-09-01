@@ -180,22 +180,9 @@ button:active {
   line-height: 1.4;
 }
 
-.sync-status {
-  font-size: 13px;
-  margin-top: 8px;
-  color: #166534;
-}
-
 .top-save {
   margin-top: 0;
   margin-bottom: 15px;
-}
-
-.debug {
-  font-size: 12px;
-  color: #6b7280;
-  margin-top: 8px;
-  word-break: break-word;
 }
 
 </style>
@@ -235,26 +222,11 @@ Customers on phone:
 
 <div class="pending">
 
-Pending collections:
+Data to update to sheet:
 
 <strong id="pendingCount">
 0
 </strong>
-
-</div>
-
-
-<div id="syncStatus"
-     class="sync-status">
-
-Starting synchronization...
-
-</div>
-
-<div id="debug"
-     class="debug">
-
-Starting application...
 
 </div>
 
@@ -481,10 +453,6 @@ function startApplication() {
     'Daily Collection application started'
   );
 
-  setDebug(
-    'JavaScript is running.'
-  );
-
   updateConnectionStatus();
 
   updateCounts();
@@ -492,25 +460,13 @@ function startApplication() {
   setDefaultPaymentFor();
 
   /*
-   * IMPORTANT:
-   *
    * We intentionally do NOT depend on the
    * service worker for the first synchronization.
    */
 
   if (navigator.onLine) {
 
-    setSyncStatus(
-      'Connecting to server...'
-    );
-
     syncNow();
-
-  } else {
-
-    setSyncStatus(
-      'Offline. Using customers saved on phone.'
-    );
 
   }
 
@@ -534,10 +490,6 @@ window.addEventListener(
 
     updateConnectionStatus();
 
-    setSyncStatus(
-      'Internet restored. Synchronizing...'
-    );
-
     syncNow();
 
   }
@@ -549,10 +501,6 @@ window.addEventListener(
   function() {
 
     updateConnectionStatus();
-
-    setSyncStatus(
-      'Offline. Data will remain saved on phone.'
-    );
 
   }
 );
@@ -590,48 +538,6 @@ function updateConnectionStatus() {
 
     element.className =
       'offline';
-
-  }
-
-}
-
-
-/********************************************************
- * DEBUG
- ********************************************************/
-
-function setDebug(message) {
-
-  const element =
-    document.getElementById(
-      'debug'
-    );
-
-  if (element) {
-
-    element.innerText =
-      message;
-
-  }
-
-}
-
-
-/********************************************************
- * SYNC STATUS
- ********************************************************/
-
-function setSyncStatus(message) {
-
-  const element =
-    document.getElementById(
-      'syncStatus'
-    );
-
-  if (element) {
-
-    element.innerText =
-      message;
 
   }
 
@@ -1186,13 +1092,8 @@ function updateLocalPaymentSummary(
 /********************************************************
  * SYNCHRONIZATION
  *
- * IMPORTANT:
- *
- * This function now synchronizes EVEN WHEN THERE ARE
- * ZERO PENDING COLLECTIONS.
- *
- * Therefore the phone can download all customers
- * immediately after opening the application.
+ * This synchronizes customers and payments even when
+ * there are zero pending collections.
  ********************************************************/
 
 async function syncNow() {
@@ -1217,12 +1118,8 @@ async function syncNow() {
     'PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE'
   ) {
 
-    setSyncStatus(
+    console.error(
       'API URL is not configured.'
-    );
-
-    setDebug(
-      'Please check API_URL in index.html.'
     );
 
     return;
@@ -1234,16 +1131,15 @@ async function syncNow() {
     true;
 
 
-try {
+  try {
 
-  const pending =
-    getPending();
+    const pending =
+      getPending();
 
 
-  console.log(
-    'Sync request started.'
-  );
-
+    console.log(
+      'Sync request started.'
+    );
 
 
     const response =
@@ -1463,36 +1359,6 @@ try {
     }
 
 
-    /******************************************************
-     * SUCCESS
-     ******************************************************/
-
-    const customerTotal =
-      getCustomers().length;
-
-
-    const pendingTotal =
-      getPending().length;
-
-
-    setSyncStatus(
-
-      'Last synchronized: ' +
-      new Date().toLocaleTimeString()
-
-    );
-
-
-    setDebug(
-
-      customerTotal +
-      ' customer(s) downloaded. ' +
-      pendingTotal +
-      ' collection(s) pending.'
-
-    );
-
-
     console.log(
       'Synchronization completed.'
     );
@@ -1504,18 +1370,6 @@ try {
       'Synchronization error:',
       error
     );
-
-
-    setSyncStatus(
-      'Synchronization failed. Retrying automatically...'
-    );
-
-
-    setDebug(
-      'Error: ' +
-      error.message
-    );
-
 
   } finally {
 
