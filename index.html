@@ -1143,9 +1143,19 @@ function updateLocalPaymentSummary(
  * SYNCHRONIZATION
  ********************************************************/
 
+/********************************************************
+ * SYNCHRONIZATION
+ *
+ * Sends pending collections to Google Apps Script.
+ ********************************************************/
+
 async function syncNow() {
 
   if (!navigator.onLine) {
+
+    console.log(
+      'Sync skipped: device is offline.'
+    );
 
     return;
 
@@ -1154,23 +1164,8 @@ async function syncNow() {
 
   if (syncInProgress) {
 
-    return;
-
-  }
-
-
-  /*
-   * Check API URL.
-   */
-
-  if (
-    !API_URL ||
-    API_URL ===
-    'PASTE_YOUR_ACTUAL_WEB_APP_URL_HERE'
-  ) {
-
-    console.error(
-      'API URL is not configured.'
+    console.log(
+      'Sync skipped: another sync is already running.'
     );
 
     return;
@@ -1178,8 +1173,29 @@ async function syncNow() {
   }
 
 
-  syncInProgress =
-    true;
+  if (
+    !API_URL ||
+    API_URL.trim() === '' ||
+    API_URL === 'paste the url here' ||
+    API_URL === 'PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE'
+  ) {
+
+    console.error(
+      'API URL is not configured correctly.'
+    );
+
+    showMessage(
+      'saveMessage',
+      'Google Sheets URL is not configured.',
+      false
+    );
+
+    return;
+
+  }
+
+
+  syncInProgress = true;
 
 
   try {
@@ -1189,35 +1205,41 @@ async function syncNow() {
 
 
     console.log(
-      'Starting synchronization.'
-    );
-
-
-    console.log(
       'Pending transactions:',
       pending
     );
 
 
-    const requestData = {
+    /*
+     * Nothing to send.
+     */
 
-      action:
-        'sync',
+    if (!pending.length) {
 
-      pending:
-        pending,
+      console.log(
+        'No pending transactions.'
+      );
 
-      agent:
-        getAgent()
+      syncInProgress = false;
 
-    };
+      return;
+
+    }
+
+
+    const agent =
+      getAgent();
 
 
     console.log(
-      'Sending request:',
-      requestData
+      'Agent:',
+      agent
     );
 
+
+    /*
+     * Send request.
+     */
 
     const response =
       await fetch(
@@ -1237,69 +1259,127 @@ async function syncNow() {
           },
 
           body:
-            JSON.stringify(
-              requestData
-            )
+            JSON.stringify({
+
+              action:
+                'sync',
+
+              pending:
+                pending,
+
+              agent:
+                agent
+
+            })
 
         }
 
       );
 
 
+    console.log(
+      'HTTP status:',
+      response.status
+    );
+
+
     if (!response.ok) {
 
       throw new Error(
-        'HTTP error: ' +
+        'Google Apps Script HTTP error: ' +
         response.status
       );
 
     }
 
 
-    const result =
-      await response.json();
+    const responseText =
+      await response.text();
 
 
     console.log(
-      'Server response:',
-      result
+      'Raw server response:',
+      responseText
     );
 
 
-    if (!result) {
+    if (!responseText) {
 
       throw new Error(
-        'Empty response from server.'
+        'Google Apps Script returned an empty response.'
       );
 
     }
 
 
-    /*
-     * IMPORTANT:
-     *
-     * The server may successfully process
-     * some transactions while reporting failures
-     * for others.
-     *
-     * Therefore remove only the IDs that the
-     * server explicitly reports as synced.
-     */
+    let result;
 
 
-    const syncedIds =
-      new Set(
+    try {
 
-        Array.isArray(
-          result.syncedIds
-        )
+      result =
+        JSON.parse(
+          responseText
+        );
 
-          ? result.syncedIds
+    } catch (parseError) {
 
-          : []
-
+      console.error(
+        'JSON parse error:',
+        parseError
       );
 
+      throw new Error(
+        'Server returned invalid JSON: ' +
+        responseText.substring(0, 300)
+      );
+
+    }
+
+
+    console.log(
+      'Parsed server response:',
+      result
+    );
+
+
+    /*
+     * SERVER REJECTED THE SYNC
+     */
+
+    if (!result.success) {
+
+      const serverMessage =
+        result.message ||
+        'Server synchronization failed.';
+
+
+      console.error(
+        'SERVER SYNC FAILED:',
+        serverMessage
+      );
+
+
+      /*
+       * Keep the transaction on the phone.
+       * DO NOT delete pending data.
+       */
+
+      showMessage(
+        'saveMessage',
+        'Sync failed: ' + serverMessage,
+        false
+      );
+
+
+      return;
+
+    }
+
+
+    /******************************************************
+     * SAVE CUSTOMERS FROM SERVER
+     ******************************************************/
 
     if (
       Array.isArray(
@@ -1320,8 +1400,13 @@ async function syncNow() {
     }
 
 
+    /******************************************************
+     * SAVE PAYMENT SUMMARY
+     ******************************************************/
+
     if (
-      result.payments
+      result.payments &&
+      typeof result.payments === 'object'
     ) {
 
       localStorage.setItem(
@@ -1335,6 +1420,24 @@ async function syncNow() {
       );
 
     }
+
+
+    /******************************************************
+     * REMOVE ONLY SUCCESSFULLY SYNCED TRANSACTIONS
+     ******************************************************/
+
+    const syncedIds =
+      new Set(
+
+        Array.isArray(
+          result.syncedIds
+        )
+
+          ? result.syncedIds
+
+          : []
+
+      );
 
 
     const remaining =
@@ -1362,57 +1465,16 @@ async function syncNow() {
     );
 
 
+    /******************************************************
+     * UPDATE COUNTS
+     ******************************************************/
+
     updateCounts();
 
 
-    /*
-     * Show synchronization failure
-     * if there are failed transactions.
-     */
-
-    if (
-      Array.isArray(
-        result.failed
-      ) &&
-      result.failed.length > 0
-    ) {
-
-      console.error(
-        'Some transactions failed:',
-        result.failed
-      );
-
-
-      showMessage(
-
-        'saveMessage',
-
-        'Some collections could not be synchronized. They remain pending on this phone.',
-
-        false
-
-      );
-
-    } else if (
-      syncedIds.size > 0
-    ) {
-
-      showMessage(
-
-        'saveMessage',
-
-        'Collection synchronized successfully.',
-
-        true
-
-      );
-
-    }
-
-
-    /*
-     * Refresh current customer.
-     */
+    /******************************************************
+     * REFRESH CURRENT CUSTOMER
+     ******************************************************/
 
     if (currentCustomer) {
 
@@ -1456,28 +1518,44 @@ async function syncNow() {
     }
 
 
+    showMessage(
+      'saveMessage',
+      'Collection synchronized successfully.',
+      true
+    );
+
+
     console.log(
-      'Synchronization completed.'
+      'Synchronization completed successfully.'
     );
 
 
   } catch (error) {
 
     console.error(
-      'Synchronization error:',
+      'SYNCHRONIZATION ERROR:',
       error
     );
 
+
+    /*
+     * VERY IMPORTANT:
+     *
+     * Do not remove the pending transaction
+     * when synchronization fails.
+     */
 
     showMessage(
 
       'saveMessage',
 
-      'Collection is saved on this phone, but synchronization failed. It will try again automatically.',
+      'Sync failed. Collection is still saved on this phone. ' +
+      (error.message || String(error)),
 
       false
 
     );
+
 
   } finally {
 
@@ -1487,7 +1565,6 @@ async function syncNow() {
   }
 
 }
-
 
 /********************************************************
  * AUTOMATIC SYNC
