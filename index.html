@@ -888,7 +888,11 @@ function displayCustomer(customer) {
 
 function saveCollection() {
 
+  console.log("SAVE BUTTON CLICKED");
+
   if (!currentCustomer) {
+
+    console.log("SAVE STOPPED: No current customer");
 
     showMessage(
 
@@ -901,6 +905,151 @@ function saveCollection() {
     );
 
     return;
+
+  }
+
+  console.log(
+    "Customer selected:",
+    currentCustomer
+  );
+
+  const paymentForDate =
+    getPaymentForDate();
+
+  console.log(
+    "Payment For Date:",
+    paymentForDate
+  );
+
+  if (!paymentForDate) {
+
+    console.log(
+      "SAVE STOPPED: No payment month selected"
+    );
+
+    showMessage(
+
+      'saveMessage',
+
+      'Please select the month this collection is for.',
+
+      false
+
+    );
+
+    return;
+
+  }
+
+  const remarks =
+    document.getElementById(
+      'remarks'
+    )
+    .value
+    .trim();
+
+  const transactionDate =
+    new Date();
+
+  const pending =
+    getPending();
+
+  const transaction = {
+
+    transactionId:
+      createTransactionId(),
+
+    transactionDate:
+      transactionDate.toISOString(),
+
+    coveredDate:
+      paymentForDate.toISOString(),
+
+    crf:
+      currentCustomer.crf,
+
+    agent:
+      getAgent(),
+
+    remarks:
+      remarks
+
+  };
+
+  console.log(
+    "NEW TRANSACTION:",
+    transaction
+  );
+
+  pending.push(
+    transaction
+  );
+
+  localStorage.setItem(
+
+    PENDING_KEY,
+
+    JSON.stringify(
+      pending
+    )
+
+  );
+
+  console.log(
+    "PENDING TRANSACTIONS:",
+    getPending()
+  );
+
+  updateLocalPaymentSummary(
+
+    currentCustomer.crf,
+
+    transactionDate,
+
+    paymentForDate
+
+  );
+
+  updateCounts();
+
+  clearForm();
+
+  showMessage(
+
+    'saveMessage',
+
+    navigator.onLine
+
+      ? 'Collection saved. Synchronizing...'
+
+      : 'Collection saved offline. It will synchronize when internet returns.',
+
+    true
+
+  );
+
+  console.log(
+    "Collection saved locally."
+  );
+
+  if (navigator.onLine) {
+
+    console.log(
+      "Internet available. Starting sync..."
+    );
+
+    syncNow();
+
+  } else {
+
+    console.log(
+      "Offline. Sync will happen when internet returns."
+    );
+
+  }
+
+}
+
 
   }
 
