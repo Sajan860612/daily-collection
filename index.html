@@ -180,9 +180,9 @@ button:active {
   line-height: 1.4;
 }
 
-.top-save {
-  margin-top: 0;
-  margin-bottom: 15px;
+.bottom-save {
+  margin-top: 15px;
+  margin-bottom: 0;
 }
 
 </style>
@@ -233,17 +233,6 @@ Data to update to sheet:
 </div>
 
 
-<!-- SAVE -->
-
-<button id="topSaveButton"
-        class="save top-save"
-        onclick="saveCollection()">
-
-💰 Save Collection
-
-</button>
-
-
 <!-- SEARCH -->
 
 <div class="card">
@@ -279,9 +268,22 @@ CRF Number
 <div id="customerCard"
      class="card customer">
 
-<h3 id="customerName"></h3>
+
+<!-- CUSTOMER INFORMATION -->
 
 <div class="info">
+
+
+<div class="info-row">
+
+<span class="label">
+Name:
+</span>
+
+<span id="customerName"></span>
+
+</div>
+
 
 <div class="info-row">
 
@@ -397,6 +399,17 @@ Remarks
 <div id="saveMessage"
      class="message">
 </div>
+
+
+<!-- SAVE COLLECTION AT BOTTOM -->
+
+<button id="bottomSaveButton"
+        class="save bottom-save"
+        onclick="saveCollection()">
+
+💰 Save Collection
+
+</button>
 
 </div>
 
@@ -847,7 +860,7 @@ function displayCustomer(customer) {
     document.getElementById(
       'paidThrough'
     ).innerText =
-      formatDisplayDate(
+      formatPaidTill(
         payment.paidThrough
       ) ||
       '-';
@@ -1590,6 +1603,73 @@ function formatDate(date) {
     ' ' +
 
     d.getFullYear()
+
+  );
+
+}
+
+
+/********************************************************
+ * FORMAT PAID TILL
+ *
+ * Returns:
+ * SEPTEMBER 2026
+ *
+ * Instead of:
+ * 01 SEPTEMBER 2026
+ ********************************************************/
+
+function formatPaidTill(value) {
+
+  if (!value) {
+
+    return '';
+
+  }
+
+
+  const date =
+    new Date(value);
+
+
+  if (
+    isNaN(
+      date.getTime()
+    )
+  ) {
+
+    return '';
+
+  }
+
+
+  const months = [
+
+    'JANUARY',
+    'FEBRUARY',
+    'MARCH',
+    'APRIL',
+    'MAY',
+    'JUNE',
+    'JULY',
+    'AUGUST',
+    'SEPTEMBER',
+    'OCTOBER',
+    'NOVEMBER',
+    'DECEMBER'
+
+  ];
+
+
+  return (
+
+    months[
+      date.getMonth()
+    ] +
+
+    ' ' +
+
+    date.getFullYear()
 
   );
 
