@@ -249,6 +249,7 @@ CRF Number
 >
 
 <button
+  type="button"
   class="search"
   onclick="searchCustomer()">
 
@@ -401,11 +402,13 @@ Remarks
 </div>
 
 
-<!-- SAVE COLLECTION AT BOTTOM -->
+<!-- SAVE -->
 
-<button id="bottomSaveButton"
-        class="save bottom-save"
-        onclick="saveCollection()">
+<button
+  id="bottomSaveButton"
+  type="button"
+  class="save bottom-save"
+  onclick="saveCollection()">
 
 💰 Save Collection
 
@@ -419,9 +422,10 @@ Remarks
 <script>
 
 /********************************************************
- * GOOGLE APPS SCRIPT URL
+ * GOOGLE APPS SCRIPT WEB APP URL
  *
- * PUT YOUR REAL DEPLOYED WEB APP URL HERE.
+ * IMPORTANT:
+ * Put your EXISTING correct deployed Web App URL here.
  ********************************************************/
 
 const API_URL =
@@ -471,11 +475,6 @@ function startApplication() {
   updateCounts();
 
   setDefaultPaymentFor();
-
-  /*
-   * We intentionally do NOT depend on the
-   * service worker for the first synchronization.
-   */
 
   if (navigator.onLine) {
 
@@ -576,6 +575,7 @@ function getCustomers() {
   } catch (error) {
 
     console.error(
+      'Customer storage error:',
       error
     );
 
@@ -601,6 +601,7 @@ function getPayments() {
   } catch (error) {
 
     console.error(
+      'Payment storage error:',
       error
     );
 
@@ -626,6 +627,7 @@ function getPending() {
   } catch (error) {
 
     console.error(
+      'Pending storage error:',
       error
     );
 
@@ -717,6 +719,12 @@ function searchCustomer() {
       'crfSearch'
     );
 
+  if (!input) {
+
+    return;
+
+  }
+
   const crf =
     input.value
       .trim()
@@ -769,6 +777,16 @@ function searchCustomer() {
 
     );
 
+    /*
+     * Try synchronization once more.
+     */
+
+    if (navigator.onLine) {
+
+      syncNow();
+
+    }
+
     return;
 
   }
@@ -794,9 +812,18 @@ function searchCustomer() {
 
 function displayCustomer(customer) {
 
-  document.getElementById(
-    'customerCard'
-  ).style.display =
+  const card =
+    document.getElementById(
+      'customerCard'
+    );
+
+  if (!card) {
+
+    return;
+
+  }
+
+  card.style.display =
     'block';
 
 
@@ -888,11 +915,7 @@ function displayCustomer(customer) {
 
 function saveCollection() {
 
-  console.log("SAVE BUTTON CLICKED");
-
   if (!currentCustomer) {
-
-    console.log("SAVE STOPPED: No current customer");
 
     showMessage(
 
@@ -908,24 +931,12 @@ function saveCollection() {
 
   }
 
-  console.log(
-    "Customer selected:",
-    currentCustomer
-  );
 
   const paymentForDate =
     getPaymentForDate();
 
-  console.log(
-    "Payment For Date:",
-    paymentForDate
-  );
 
   if (!paymentForDate) {
-
-    console.log(
-      "SAVE STOPPED: No payment month selected"
-    );
 
     showMessage(
 
@@ -941,18 +952,26 @@ function saveCollection() {
 
   }
 
-  const remarks =
+
+  const remarksElement =
     document.getElementById(
       'remarks'
-    )
-    .value
-    .trim();
+    );
+
+
+  const remarks =
+    remarksElement
+      ? remarksElement.value.trim()
+      : '';
+
 
   const transactionDate =
     new Date();
 
+
   const pending =
     getPending();
+
 
   const transaction = {
 
@@ -976,142 +995,10 @@ function saveCollection() {
 
   };
 
-  console.log(
-    "NEW TRANSACTION:",
-    transaction
-  );
 
   pending.push(
     transaction
   );
-
-  localStorage.setItem(
-
-    PENDING_KEY,
-
-    JSON.stringify(
-      pending
-    )
-
-  );
-
-  console.log(
-    "PENDING TRANSACTIONS:",
-    getPending()
-  );
-
-  updateLocalPaymentSummary(
-
-    currentCustomer.crf,
-
-    transactionDate,
-
-    paymentForDate
-
-  );
-
-  updateCounts();
-
-  clearForm();
-
-  showMessage(
-
-    'saveMessage',
-
-    navigator.onLine
-
-      ? 'Collection saved. Synchronizing...'
-
-      : 'Collection saved offline. It will synchronize when internet returns.',
-
-    true
-
-  );
-
-  console.log(
-    "Collection saved locally."
-  );
-
-  if (navigator.onLine) {
-
-    console.log(
-      "Internet available. Starting sync..."
-    );
-
-    syncNow();
-
-  } else {
-
-    console.log(
-      "Offline. Sync will happen when internet returns."
-    );
-
-  }
-
-}
-
-
-  }
-
-
-  const paymentForDate =
-    getPaymentForDate();
-
-
-  if (!paymentForDate) {
-
-    showMessage(
-
-      'saveMessage',
-
-      'Please select the month this collection is for.',
-
-      false
-
-    );
-
-    return;
-
-  }
-
-
-  const remarks =
-    document.getElementById(
-      'remarks'
-    )
-    .value
-    .trim();
-
-
-  const transactionDate =
-    new Date();
-
-
-  const pending =
-    getPending();
-
-
-  pending.push({
-
-    transactionId:
-      createTransactionId(),
-
-    transactionDate:
-      transactionDate.toISOString(),
-
-    coveredDate:
-      paymentForDate.toISOString(),
-
-    crf:
-      currentCustomer.crf,
-
-    agent:
-      getAgent(),
-
-    remarks:
-      remarks
-
-  });
 
 
   localStorage.setItem(
@@ -1178,6 +1065,7 @@ function updateLocalPaymentSummary(
 
   const payments =
     getPayments();
+
 
   const key =
     String(crf)
@@ -1253,9 +1141,6 @@ function updateLocalPaymentSummary(
 
 /********************************************************
  * SYNCHRONIZATION
- *
- * This synchronizes customers and payments even when
- * there are zero pending collections.
  ********************************************************/
 
 async function syncNow() {
@@ -1274,10 +1159,14 @@ async function syncNow() {
   }
 
 
+  /*
+   * Check API URL.
+   */
+
   if (
     !API_URL ||
     API_URL ===
-    'PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE'
+    'PASTE_YOUR_ACTUAL_WEB_APP_URL_HERE'
   ) {
 
     console.error(
@@ -1300,7 +1189,33 @@ async function syncNow() {
 
 
     console.log(
-      'Sync request started.'
+      'Starting synchronization.'
+    );
+
+
+    console.log(
+      'Pending transactions:',
+      pending
+    );
+
+
+    const requestData = {
+
+      action:
+        'sync',
+
+      pending:
+        pending,
+
+      agent:
+        getAgent()
+
+    };
+
+
+    console.log(
+      'Sending request:',
+      requestData
     );
 
 
@@ -1322,18 +1237,9 @@ async function syncNow() {
           },
 
           body:
-            JSON.stringify({
-
-              action:
-                'sync',
-
-              pending:
-                pending,
-
-              agent:
-                getAgent()
-
-            })
+            JSON.stringify(
+              requestData
+            )
 
         }
 
@@ -1343,7 +1249,7 @@ async function syncNow() {
     if (!response.ok) {
 
       throw new Error(
-        'HTTP ' +
+        'HTTP error: ' +
         response.status
       );
 
@@ -1355,7 +1261,7 @@ async function syncNow() {
 
 
     console.log(
-      'Sync response:',
+      'Server response:',
       result
     );
 
@@ -1369,21 +1275,31 @@ async function syncNow() {
     }
 
 
-    if (!result.success) {
+    /*
+     * IMPORTANT:
+     *
+     * The server may successfully process
+     * some transactions while reporting failures
+     * for others.
+     *
+     * Therefore remove only the IDs that the
+     * server explicitly reports as synced.
+     */
 
-      throw new Error(
 
-        result.message ||
-        'Server synchronization failed.'
+    const syncedIds =
+      new Set(
+
+        Array.isArray(
+          result.syncedIds
+        )
+
+          ? result.syncedIds
+
+          : []
 
       );
 
-    }
-
-
-    /******************************************************
-     * SAVE CUSTOMERS
-     ******************************************************/
 
     if (
       Array.isArray(
@@ -1404,10 +1320,6 @@ async function syncNow() {
     }
 
 
-    /******************************************************
-     * SAVE PAYMENTS
-     ******************************************************/
-
     if (
       result.payments
     ) {
@@ -1423,24 +1335,6 @@ async function syncNow() {
       );
 
     }
-
-
-    /******************************************************
-     * REMOVE SUCCESSFULLY SYNCED TRANSACTIONS
-     ******************************************************/
-
-    const syncedIds =
-      new Set(
-
-        Array.isArray(
-          result.syncedIds
-        )
-
-          ? result.syncedIds
-
-          : []
-
-      );
 
 
     const remaining =
@@ -1468,16 +1362,57 @@ async function syncNow() {
     );
 
 
-    /******************************************************
-     * UPDATE COUNTS
-     ******************************************************/
-
     updateCounts();
 
 
-    /******************************************************
-     * REFRESH CURRENT CUSTOMER
-     ******************************************************/
+    /*
+     * Show synchronization failure
+     * if there are failed transactions.
+     */
+
+    if (
+      Array.isArray(
+        result.failed
+      ) &&
+      result.failed.length > 0
+    ) {
+
+      console.error(
+        'Some transactions failed:',
+        result.failed
+      );
+
+
+      showMessage(
+
+        'saveMessage',
+
+        'Some collections could not be synchronized. They remain pending on this phone.',
+
+        false
+
+      );
+
+    } else if (
+      syncedIds.size > 0
+    ) {
+
+      showMessage(
+
+        'saveMessage',
+
+        'Collection synchronized successfully.',
+
+        true
+
+      );
+
+    }
+
+
+    /*
+     * Refresh current customer.
+     */
 
     if (currentCustomer) {
 
@@ -1531,6 +1466,17 @@ async function syncNow() {
     console.error(
       'Synchronization error:',
       error
+    );
+
+
+    showMessage(
+
+      'saveMessage',
+
+      'Collection is saved on this phone, but synchronization failed. It will try again automatically.',
+
+      false
+
     );
 
   } finally {
@@ -1594,6 +1540,7 @@ function getAgent() {
   } catch (error) {
 
     console.error(
+      'Agent storage error:',
       error
     );
 
@@ -1601,8 +1548,9 @@ function getAgent() {
 
 
   /*
-   * Your users sheet contains AG001,
-   * so use AG001 by default.
+   * Default agent.
+   *
+   * Your users sheet contains AG001.
    */
 
   return 'AG001';
@@ -1645,6 +1593,13 @@ function getPaymentForDate() {
     );
 
 
+  if (!input) {
+
+    return null;
+
+  }
+
+
   const value =
     input.value;
 
@@ -1670,11 +1625,15 @@ function getPaymentForDate() {
 
 
   const year =
-    Number(parts[0]);
+    Number(
+      parts[0]
+    );
 
 
   const month =
-    Number(parts[1]);
+    Number(
+      parts[1]
+    );
 
 
   if (
@@ -1760,12 +1719,6 @@ function formatDate(date) {
 
 /********************************************************
  * FORMAT PAID TILL
- *
- * Returns:
- * SEPTEMBER 2026
- *
- * Instead of:
- * 01 SEPTEMBER 2026
  ********************************************************/
 
 function formatPaidTill(value) {
@@ -1866,10 +1819,19 @@ function formatDisplayDate(value) {
 
 function clearForm() {
 
-  document.getElementById(
-    'remarks'
-  ).value =
-    '';
+  const remarks =
+    document.getElementById(
+      'remarks'
+    );
+
+
+  if (remarks) {
+
+    remarks.value =
+      '';
+
+  }
+
 
   setDefaultPaymentFor();
 
