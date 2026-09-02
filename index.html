@@ -454,7 +454,7 @@ Remarks
  * Example:
  *
  * const API_URL =
- *   'https://script.google.com/macros/s/ABC123/exec';
+ *   'https://script.google.com/macros/s/ABC123/';
  *
  ********************************************************/
 
@@ -835,7 +835,15 @@ function searchCustomer() {
   }
 
 
-  let crf =
+  /*
+   * Keep exactly what the user typed.
+   *
+   * Example:
+   * 001 → 001
+   * CRF001 → CRF001
+   */
+
+  const enteredValue =
     input.value
       .trim()
       .toUpperCase();
@@ -849,21 +857,7 @@ function searchCustomer() {
   setDefaultPaymentFor();
 
 
-  /*
-   * Keep only the number in the search box.
-   *
-   * Example:
-   * CRF001 → 001
-   */
-
-  input.value =
-    crf.replace(
-      /^CRF/,
-      ''
-    );
-
-
-  if (!crf) {
+  if (!enteredValue) {
 
     showMessage(
       'searchMessage',
@@ -877,13 +871,17 @@ function searchCustomer() {
 
 
   /*
-   * Convert short CRF to full CRF.
+   * Convert short CRF to full CRF for searching.
    *
    * 001    → CRF001
    * 01     → CRF01
    * 1      → CRF1
    * CRF001 → CRF001
    */
+
+  let crf =
+    enteredValue;
+
 
   if (!crf.startsWith('CRF')) {
 
@@ -923,6 +921,15 @@ function searchCustomer() {
       'none';
 
 
+    /*
+     * Keep the user's original entry
+     * in the search box.
+     */
+
+    input.value =
+      enteredValue;
+
+
     showMessage(
 
       'searchMessage',
@@ -957,14 +964,16 @@ function searchCustomer() {
 
 
   /*
-   * Show full CRF in the search box.
+   * Keep the original number entered by the user.
    *
    * Example:
-   * 001 → CRF001
+   * User enters 001
+   * Search uses CRF001
+   * Box continues showing 001
    */
 
   input.value =
-    crf;
+    enteredValue;
 
 
   hideMessage(
