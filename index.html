@@ -835,14 +835,32 @@ function searchCustomer() {
   }
 
 
-let crf =
-  input.value
-    .trim()
-    .toUpperCase();
+  let crf =
+    input.value
+      .trim()
+      .toUpperCase();
 
 
-setDefaultPaymentFor();
+  /*
+   * Reset Payment For to the current month
+   * every time a customer is searched.
+   */
 
+  setDefaultPaymentFor();
+
+
+  /*
+   * Keep only the number in the search box.
+   *
+   * Example:
+   * CRF001 → 001
+   */
+
+  input.value =
+    crf.replace(
+      /^CRF/,
+      ''
+    );
 
 
   if (!crf) {
