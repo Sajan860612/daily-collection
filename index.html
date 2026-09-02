@@ -459,7 +459,7 @@ Remarks
  ********************************************************/
 
 const API_URL =
-  'https://script.google.com/macros/s/AKfycbwLLhoQmLtoMPQBpvraumj5nNGqtZGFLo9VbTC077SxH5AKWpow5aOaLUDMpdA7dlXJQQ/exec';
+  'paste the url here';
 
 
 /********************************************************
@@ -828,7 +828,14 @@ function searchCustomer() {
     );
 
 
-  const crf =
+  if (!input) {
+
+    return;
+
+  }
+
+
+  let crf =
     input.value
       .trim()
       .toUpperCase();
@@ -847,6 +854,23 @@ function searchCustomer() {
   }
 
 
+  /*
+   * Convert short CRF to full CRF.
+   *
+   * 001    → CRF001
+   * 01     → CRF01
+   * 1      → CRF1
+   * CRF001 → CRF001
+   */
+
+  if (!crf.startsWith('CRF')) {
+
+    crf =
+      'CRF' + crf;
+
+  }
+
+
   const customers =
     getCustomers();
 
@@ -855,12 +879,15 @@ function searchCustomer() {
     customers.find(
       function(item) {
 
-        return String(
-          item.crf || ''
-        )
-        .trim()
-        .toUpperCase()
-        === crf;
+        const customerCRF =
+          String(
+            item.crf || ''
+          )
+          .trim()
+          .toUpperCase();
+
+
+        return customerCRF === crf;
 
       }
     );
@@ -878,7 +905,9 @@ function searchCustomer() {
 
       'searchMessage',
 
-      'Customer not found on this phone. Please wait for synchronization to complete.',
+      'Customer ' +
+      crf +
+      ' not found on this phone. Please wait for synchronization to complete.',
 
       false
 
@@ -886,7 +915,8 @@ function searchCustomer() {
 
 
     /*
-     * Try sync once when customer is not found.
+     * Try synchronization once when
+     * customer is not found.
      */
 
     if (navigator.onLine) {
@@ -904,6 +934,17 @@ function searchCustomer() {
     customer;
 
 
+  /*
+   * Show full CRF in the search box.
+   *
+   * Example:
+   * 001 → CRF001
+   */
+
+  input.value =
+    crf;
+
+
   hideMessage(
     'searchMessage'
   );
@@ -914,7 +955,6 @@ function searchCustomer() {
   );
 
 }
-
 
 /********************************************************
  * DISPLAY CUSTOMER
@@ -1121,8 +1161,13 @@ function saveCollection() {
     coveredDate:
       paymentForDate.toISOString(),
 
-    crf:
-      currentCustomer.crf,
+crf:
+  String(
+    currentCustomer.crf || ''
+  )
+  .trim()
+  .toUpperCase(),
+
 
     agent:
       getAgent(),
