@@ -835,10 +835,14 @@ function searchCustomer() {
   }
 
 
-  let crf =
-    input.value
-      .trim()
-      .toUpperCase();
+let crf =
+  input.value
+    .trim()
+    .toUpperCase();
+
+
+setDefaultPaymentFor();
+
 
 
   if (!crf) {
