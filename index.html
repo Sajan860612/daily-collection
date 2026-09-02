@@ -1667,16 +1667,44 @@ async function syncNow() {
      * after synchronization.
      ****************************************************/
 
-    if (
-      result.payments &&
-      typeof result.payments === 'object'
-    ) {
+/****************************************************
+ * SAVE SERVER PAYMENT SUMMARY
+ *
+ * IMPORTANT:
+ *
+ * Always process result.payments, including when
+ * Google Sheets has NO payments.
+ *
+ * This allows deleted collections to disappear
+ * from the phone after synchronization.
+ ****************************************************/
 
-      mergeServerPayments(
-        result.payments
-      );
+if (
+  result.payments &&
+  typeof result.payments === 'object'
+) {
 
-    }
+  mergeServerPayments(
+    result.payments,
+    getPending()
+  );
+
+} else {
+
+  /*
+   * If the server returned no payment summary,
+   * use an empty object.
+   *
+   * Pending transactions are still preserved.
+   */
+
+  mergeServerPayments(
+    {},
+    getPending()
+  );
+
+}
+
 
 
     /****************************************************
@@ -1827,183 +1855,242 @@ async function syncNow() {
 /********************************************************
  * MERGE SERVER PAYMENTS
  *
- * Server data is merged with local data.
+ * IMPORTANT:
  *
- * We keep the latest actual payment date and the
- * furthest payment-for month.
+ * Server payment data is now the authoritative source.
+ *
+ * If the business owner deletes a collection from
+ * the Google Sheet, that payment will disappear from
+ * the phone after synchronization.
+ *
+ * However, collections still pending on the phone
+ * are temporarily kept until they are synchronized.
  ********************************************************/
 
 function mergeServerPayments(
-  serverPayments
+  serverPayments,
+  pendingTransactions
 ) {
 
-  const localPayments =
-    getPayments();
+  const merged = {};
 
 
-  const merged =
-    Object.assign(
-      {},
-      localPayments
-    );
+  /******************************************************
+   * 1. START WITH SERVER PAYMENTS
+   *
+   * Only payments currently existing in the
+   * Google Sheet are loaded.
+   ******************************************************/
+
+  if (
+    serverPayments &&
+    typeof serverPayments === 'object'
+  ) {
+
+    const serverKeys =
+      Object.keys(
+        serverPayments
+      );
 
 
-  const keys =
-    Object.keys(
-      serverPayments
-    );
+    for (
+      let i = 0;
+      i < serverKeys.length;
+      i++
+    ) {
+
+      const key =
+        String(
+          serverKeys[i]
+        )
+        .trim()
+        .toUpperCase();
+
+
+      const payment =
+        serverPayments[
+          serverKeys[i]
+        ];
+
+
+      if (!payment) {
+
+        continue;
+
+      }
+
+
+      merged[key] = {
+
+        lastPaymentDate:
+          payment.lastPaymentDate || '',
+
+        paidThrough:
+          payment.paidThrough || ''
+
+      };
+
+    }
+
+  }
+
+
+  /******************************************************
+   * 2. KEEP PENDING OFFLINE COLLECTIONS
+   *
+   * These collections are not yet in Google Sheets.
+   * Therefore they must remain visible on the phone
+   * until synchronization succeeds.
+   ******************************************************/
+
+  const pending =
+    Array.isArray(
+      pendingTransactions
+    )
+      ? pendingTransactions
+      : [];
 
 
   for (
     let i = 0;
-    i < keys.length;
+    i < pending.length;
     i++
   ) {
 
-    const key =
-      keys[i];
+    const transaction =
+      pending[i];
 
 
-    const server =
-      serverPayments[key];
-
-
-    if (!server) {
+    if (!transaction) {
 
       continue;
 
     }
 
 
-    const local =
-      merged[key];
+    const crf =
+      String(
+        transaction.crf || ''
+      )
+      .trim()
+      .toUpperCase();
 
 
-    /*
-     * If there is no local payment,
-     * simply use server payment.
-     */
-
-    if (!local) {
-
-      merged[key] =
-        server;
+    if (!crf) {
 
       continue;
 
     }
 
 
-    /*
-     * Latest transaction date.
-     */
+    if (!merged[crf]) {
 
-    let lastPaymentDate =
-      server.lastPaymentDate ||
-      local.lastPaymentDate ||
-      '';
+      merged[crf] = {
 
+        lastPaymentDate:
+          '',
 
-    if (
-      server.lastPaymentDate &&
-      local.lastPaymentDate
-    ) {
+        paidThrough:
+          ''
 
-      const serverDate =
-        new Date(
-          server.lastPaymentDate
-        );
-
-
-      const localDate =
-        new Date(
-          local.lastPaymentDate
-        );
-
-
-      if (
-        !isNaN(serverDate.getTime()) &&
-        !isNaN(localDate.getTime())
-      ) {
-
-        lastPaymentDate =
-          serverDate >= localDate
-            ? server.lastPaymentDate
-            : local.lastPaymentDate;
-
-      }
-
-    } else if (
-      local.lastPaymentDate
-    ) {
-
-      lastPaymentDate =
-        local.lastPaymentDate;
+      };
 
     }
 
 
-    /*
-     * Furthest paid-through month.
-     */
+    /****************************************************
+     * PENDING TRANSACTION DATE
+     ****************************************************/
 
-    let paidThrough =
-      server.paidThrough ||
-      local.paidThrough ||
-      '';
+    const transactionDate =
+      transaction.transactionDate
+        ? new Date(
+            transaction.transactionDate
+          )
+        : null;
 
 
     if (
-      server.paidThrough &&
-      local.paidThrough
+      transactionDate &&
+      !isNaN(
+        transactionDate.getTime()
+      )
     ) {
 
-      const serverDate =
-        new Date(
-          server.paidThrough
-        );
-
-
-      const localDate =
-        new Date(
-          local.paidThrough
-        );
+      const existingDate =
+        merged[crf].lastPaymentDate
+          ? new Date(
+              merged[crf].lastPaymentDate
+            )
+          : null;
 
 
       if (
-        !isNaN(serverDate.getTime()) &&
-        !isNaN(localDate.getTime())
+        !existingDate ||
+        isNaN(
+          existingDate.getTime()
+        ) ||
+        transactionDate >
+        existingDate
       ) {
 
-        paidThrough =
-          serverDate >= localDate
-            ? server.paidThrough
-            : local.paidThrough;
+        merged[crf].lastPaymentDate =
+          transactionDate.toISOString();
 
       }
-
-    } else if (
-      local.paidThrough
-    ) {
-
-      paidThrough =
-        local.paidThrough;
 
     }
 
 
-    merged[key] = {
+    /****************************************************
+     * PENDING COVERED MONTH
+     ****************************************************/
 
-      lastPaymentDate:
-        lastPaymentDate,
+    const coveredDate =
+      transaction.coveredDate
+        ? new Date(
+            transaction.coveredDate
+          )
+        : null;
 
-      paidThrough:
-        paidThrough
 
-    };
+    if (
+      coveredDate &&
+      !isNaN(
+        coveredDate.getTime()
+      )
+    ) {
+
+      const existingCovered =
+        merged[crf].paidThrough
+          ? new Date(
+              merged[crf].paidThrough
+            )
+          : null;
+
+
+      if (
+        !existingCovered ||
+        isNaN(
+          existingCovered.getTime()
+        ) ||
+        coveredDate >
+        existingCovered
+      ) {
+
+        merged[crf].paidThrough =
+          coveredDate.toISOString();
+
+      }
+
+    }
 
   }
 
+
+  /******************************************************
+   * 3. SAVE NEW PAYMENT SUMMARY
+   ******************************************************/
 
   localStorage.setItem(
 
@@ -2016,8 +2103,6 @@ function mergeServerPayments(
   );
 
 }
-
-
 /********************************************************
  * AUTOMATIC SYNC
  ********************************************************/
