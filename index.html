@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 
 <meta name="viewport"
-      content="width=device-width, initial-scale=1.0">
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 <meta name="theme-color"
       content="#166534">
@@ -16,115 +16,59 @@
 
 <title>Daily Collection</title>
 
+
 <style>
+
+/* =====================================================
+   GLOBAL
+   ===================================================== */
 
 * {
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
 }
 
 body {
-  margin: 0;
-  font-family: Arial, sans-serif;
+  font-family: Arial, Helvetica, sans-serif;
   background: #f3f4f6;
   color: #111827;
 }
 
+
+/* =====================================================
+   HEADER
+   ===================================================== */
+
 .header {
+  height: 64px;
   background: #166534;
   color: white;
-  padding: 18px;
+  padding: 8px 12px;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .header h2 {
-  margin: 0 0 8px;
+  margin: 0;
+  font-size: 20px;
+  line-height: 22px;
 }
 
-.container {
-  max-width: 600px;
-  margin: auto;
-  padding: 15px;
-}
-
-.card {
-  background: white;
-  border-radius: 12px;
-  padding: 18px;
-  margin-bottom: 15px;
-  box-shadow: 0 2px 8px rgba(0,0,0,.08);
-}
-
-label {
-  display: block;
-  font-weight: bold;
-  margin: 12px 0 6px;
-}
-
-input,
-textarea {
-  width: 100%;
-  padding: 13px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 16px;
-  background: white;
-  color: #111827;
-}
-
-input:focus,
-textarea:focus {
-  outline: none;
-  border-color: #166534;
-  box-shadow: 0 0 0 2px rgba(22,101,52,.12);
-}
-
-textarea {
-  min-height: 90px;
-  resize: vertical;
-}
-
-button {
-  width: 100%;
-  padding: 14px;
-  margin-top: 12px;
-  border: 0;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-button:active {
-  transform: scale(.99);
-}
-
-button:disabled {
-  opacity: .6;
-  cursor: not-allowed;
-}
-
-.search {
-  background: #2563eb;
-  color: white;
-}
-
-.save {
-  background: #16a34a;
-  color: white;
-}
-
-.info {
-  background: #f0fdf4;
-  padding: 12px;
-  border-radius: 8px;
-  margin-top: 12px;
-}
-
-.info-row {
-  padding: 7px 0;
-}
-
-.label {
+#connectionStatus {
+  margin-top: 3px;
+  font-size: 12px;
+  line-height: 15px;
   font-weight: bold;
 }
 
@@ -136,63 +80,562 @@ button:disabled {
   color: #fecaca;
 }
 
+
+/* =====================================================
+   MAIN CONTAINER
+   ===================================================== */
+
+.container {
+  width: 100%;
+  max-width: 600px;
+  height: calc(100dvh - 64px);
+  margin: 0 auto;
+  padding: 7px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow: hidden;
+}
+
+
+/* =====================================================
+   CARDS
+   ===================================================== */
+
+.card {
+  background: white;
+  border-radius: 10px;
+  padding: 9px;
+  box-shadow: 0 1px 5px rgba(0,0,0,.08);
+  flex-shrink: 0;
+}
+
+
+/* =====================================================
+   STATUS CARD
+   ===================================================== */
+
+.status-card {
+  padding: 7px 9px;
+}
+
+.status-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+}
+
+.status-box {
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 6px;
+  text-align: center;
+  border: 1px solid #e5e7eb;
+}
+
+.status-number {
+  display: block;
+  font-size: 20px;
+  font-weight: bold;
+  color: #166534;
+  line-height: 22px;
+}
+
+.status-label {
+  display: block;
+  font-size: 11px;
+  color: #6b7280;
+  margin-top: 1px;
+}
+
+.pending-box {
+  background: #fff7ed;
+  border-color: #fed7aa;
+}
+
+.pending-box .status-number {
+  color: #c2410c;
+}
+
+.sync-info {
+  font-size: 10px;
+  color: #6b7280;
+  text-align: center;
+  margin-top: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+/* =====================================================
+   SEARCH
+   ===================================================== */
+
+.search-card {
+  padding: 9px;
+}
+
+.section-title {
+  font-size: 14px;
+  font-weight: bold;
+  color: #166534;
+  margin-bottom: 5px;
+}
+
+.search-row {
+  display: flex;
+  gap: 6px;
+}
+
+.search-input {
+  flex: 1;
+  min-width: 0;
+}
+
+input,
+textarea {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 7px;
+  font-size: 16px;
+  background: white;
+  color: #111827;
+  font-family: inherit;
+}
+
+input {
+  height: 42px;
+  padding: 8px 10px;
+}
+
+input:focus,
+textarea:focus {
+  outline: none;
+  border-color: #166534;
+  box-shadow: 0 0 0 2px rgba(22,101,52,.12);
+}
+
+.search-button {
+  width: 105px;
+  height: 42px;
+  margin: 0;
+  padding: 0 7px;
+  background: #2563eb;
+  color: white;
+  border: 0;
+  border-radius: 7px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.search-button:active {
+  transform: scale(.98);
+}
+
+
+/* =====================================================
+   CUSTOMER CARD
+   ===================================================== */
+
+.customer {
+  display: none;
+  padding: 9px;
+}
+
+
+/* =====================================================
+   CUSTOMER HEADER
+   ===================================================== */
+
+.customer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 7px;
+}
+
+.customer-name {
+  font-size: 18px;
+  font-weight: bold;
+  color: #111827;
+  line-height: 21px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.customer-crf {
+  font-size: 12px;
+  color: #166534;
+  font-weight: bold;
+  margin-top: 2px;
+}
+
+
+/* =====================================================
+   CUSTOMER DETAILS
+   ===================================================== */
+
+.customer-details {
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  padding: 7px;
+}
+
+.detail-row {
+  display: grid;
+  grid-template-columns: 78px 1fr;
+  gap: 5px;
+  padding: 3px 0;
+  font-size: 12px;
+  line-height: 15px;
+}
+
+.detail-label {
+  color: #6b7280;
+  font-weight: bold;
+}
+
+.detail-value {
+  color: #111827;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+/* =====================================================
+   PAYMENT SUMMARY
+   ===================================================== */
+
+.payment-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-top: 7px;
+}
+
+.payment-status {
+  border-radius: 8px;
+  padding: 6px;
+  text-align: center;
+}
+
+.last-payment {
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+}
+
+.paid-till {
+  background: #ecfdf5;
+  border: 1px solid #bbf7d0;
+}
+
+.payment-status-label {
+  font-size: 9px;
+  color: #6b7280;
+  font-weight: bold;
+  display: block;
+}
+
+.payment-status-value {
+  font-size: 12px;
+  font-weight: bold;
+  color: #111827;
+  display: block;
+  margin-top: 2px;
+}
+
+.paid-till .payment-status-value {
+  color: #166534;
+}
+
+
+/* =====================================================
+   COLLECTION MONTH
+   ===================================================== */
+
+.collection-box {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 7px;
+  margin-top: 7px;
+}
+
+.collection-title {
+  font-size: 12px;
+  color: #1e40af;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+#paymentFor {
+  height: 38px;
+  border-color: #93c5fd;
+  background: white;
+}
+
+
+/* =====================================================
+   REMARKS
+   ===================================================== */
+
+.remarks-box {
+  margin-top: 6px;
+}
+
+.remarks-label {
+  display: block;
+  font-size: 12px;
+  font-weight: bold;
+  margin-bottom: 3px;
+  color: #374151;
+}
+
+textarea {
+  height: 38px;
+  min-height: 38px;
+  resize: none;
+  padding: 8px 10px;
+  font-size: 14px;
+}
+
+
+/* =====================================================
+   SAVE BUTTON
+   ===================================================== */
+
+.save-button {
+  width: 100%;
+  height: 45px;
+  margin: 7px 0 0;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: #16a34a;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.save-button:active {
+  transform: scale(.98);
+}
+
+.save-button:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+
+/* =====================================================
+   MESSAGES
+   ===================================================== */
+
 .message {
   display: none;
-  padding: 12px;
-  margin-top: 10px;
-  border-radius: 8px;
+  padding: 7px 9px;
+  margin-top: 6px;
+  border-radius: 7px;
+  font-size: 12px;
+  line-height: 15px;
 }
 
 .success {
   display: block;
   background: #dcfce7;
   color: #166534;
+  border: 1px solid #bbf7d0;
 }
 
 .error {
   display: block;
   background: #fee2e2;
   color: #991b1b;
+  border: 1px solid #fecaca;
 }
 
-.customer {
-  display: none;
+
+/* =====================================================
+   SEARCH MESSAGE
+   ===================================================== */
+
+#searchMessage {
+  margin-top: 5px;
 }
 
-.pending {
-  background: #fff7ed;
-  border: 1px solid #fed7aa;
-  padding: 12px;
-  border-radius: 8px;
-  margin-top: 10px;
+
+/* =====================================================
+   SMALL PHONES
+   ===================================================== */
+
+@media (max-height: 650px) {
+
+  .header {
+    height: 58px;
+  }
+
+  .container {
+    height: calc(100dvh - 58px);
+    padding: 5px;
+    gap: 4px;
+  }
+
+  .card {
+    padding: 7px;
+  }
+
+  .customer-name {
+    font-size: 16px;
+  }
+
+  .detail-row {
+    padding: 2px 0;
+  }
+
+  .payment-summary {
+    margin-top: 5px;
+  }
+
+  .collection-box {
+    margin-top: 5px;
+  }
+
+  .remarks-box {
+    margin-top: 4px;
+  }
+
+  .save-button {
+    height: 42px;
+    margin-top: 5px;
+  }
+
 }
 
-.payment-for-box {
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
-  padding: 12px;
-  border-radius: 8px;
-  margin-top: 10px;
+
+/* =====================================================
+   VERY SMALL PHONES
+   ===================================================== */
+
+@media (max-height: 560px) {
+
+  .header {
+    height: 52px;
+  }
+
+  .header h2 {
+    font-size: 17px;
+    line-height: 18px;
+  }
+
+  #connectionStatus {
+    font-size: 10px;
+    line-height: 11px;
+  }
+
+  .container {
+    height: calc(100dvh - 52px);
+    padding: 4px;
+    gap: 3px;
+  }
+
+  .card {
+    padding: 6px;
+  }
+
+  .status-number {
+    font-size: 17px;
+  }
+
+  .search-input,
+  .search-button {
+    height: 38px;
+  }
+
+  .customer-name {
+    font-size: 15px;
+    line-height: 17px;
+  }
+
+  .detail-row {
+    font-size: 11px;
+    line-height: 13px;
+  }
+
+  .payment-status {
+    padding: 4px;
+  }
+
+  .collection-box {
+    padding: 5px;
+  }
+
+  #paymentFor {
+    height: 34px;
+  }
+
+  textarea {
+    height: 32px;
+    min-height: 32px;
+  }
+
+  .save-button {
+    height: 39px;
+    font-size: 14px;
+  }
+
 }
 
-.payment-for-help {
-  color: #1e40af;
-  font-size: 13px;
-  margin-top: 6px;
-  line-height: 1.4;
+
+/* =====================================================
+   LANDSCAPE
+   ===================================================== */
+
+@media (orientation: landscape) and (max-height: 500px) {
+
+  .header {
+    height: 48px;
+  }
+
+  .header h2 {
+    font-size: 16px;
+    line-height: 17px;
+  }
+
+  #connectionStatus {
+    font-size: 9px;
+  }
+
+  .container {
+    height: calc(100dvh - 48px);
+    max-width: 750px;
+    display: grid;
+    grid-template-columns: 0.8fr 1.2fr;
+    grid-template-rows: auto 1fr;
+    gap: 5px;
+  }
+
+  .status-card {
+    grid-column: 1;
+  }
+
+  .search-card {
+    grid-column: 1;
+  }
+
+  .customer {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+
 }
 
-.bottom-save {
-  margin-top: 15px;
-  margin-bottom: 0;
-}
-
-.sync-info {
-  font-size: 13px;
-  color: #374151;
-  margin-top: 8px;
-  text-align: center;
-}
 
 </style>
 
@@ -202,15 +645,17 @@ button:disabled {
 <body>
 
 
+<!-- ===================================================
+     HEADER
+     =================================================== -->
+
 <header class="header">
 
-<h2>
-Daily Collection
-</h2>
+  <h2>Daily Collection</h2>
 
-<div id="connectionStatus">
-Checking connection...
-</div>
+  <div id="connectionStatus">
+    Checking connection...
+  </div>
 
 </header>
 
@@ -218,222 +663,274 @@ Checking connection...
 <main class="container">
 
 
-<!-- STATUS -->
+<!-- ===================================================
+     STATUS
+     =================================================== -->
 
-<div class="card">
+<div class="card status-card">
 
-<strong>
-Customers on phone:
-</strong>
+  <div class="status-grid">
 
-<span id="customerCount">
-0
-</span>
+    <div class="status-box">
 
+      <span
+        id="customerCount"
+        class="status-number">
+        0
+      </span>
 
-<div class="pending">
+      <span class="status-label">
+        Customers
+      </span>
 
-Data to update to sheet:
-
-<strong id="pendingCount">
-0
-</strong>
-
-</div>
-
-<div
-  id="syncInfo"
-  class="sync-info">
-
-Starting...
-
-</div>
-
-</div>
+    </div>
 
 
-<!-- SEARCH -->
+    <div class="status-box pending-box">
 
-<div class="card">
+      <span
+        id="pendingCount"
+        class="status-number">
+        0
+      </span>
 
-<label>
-CRF Number
-</label>
+      <span class="status-label">
+        Pending Sync
+      </span>
 
-<input
-  id="crfSearch"
-  type="text"
-  placeholder="Enter CRF number"
-  autocomplete="off"
->
+    </div>
 
-<button
-  id="searchButton"
-  class="search"
-  onclick="searchCustomer()">
+  </div>
 
-🔍 Search Customer
 
-</button>
+  <div
+    id="syncInfo"
+    class="sync-info">
 
-<div
-  id="searchMessage"
-  class="message">
-</div>
+    Starting...
+
+  </div>
 
 </div>
 
 
-<!-- CUSTOMER -->
+<!-- ===================================================
+     SEARCH
+     =================================================== -->
+
+<div class="card search-card">
+
+  <div class="section-title">
+    🔎 FIND CUSTOMER
+  </div>
+
+
+  <div class="search-row">
+
+    <input
+      id="crfSearch"
+      class="search-input"
+      type="text"
+      placeholder="Enter CRF e.g. 001"
+      autocomplete="off"
+      autocapitalize="characters"
+      inputmode="text"
+    >
+
+
+    <button
+      id="searchButton"
+      class="search-button"
+      onclick="searchCustomer()">
+
+      SEARCH
+
+    </button>
+
+  </div>
+
+
+  <div
+    id="searchMessage"
+    class="message">
+  </div>
+
+</div>
+
+
+<!-- ===================================================
+     CUSTOMER
+     =================================================== -->
 
 <div
   id="customerCard"
   class="card customer">
 
 
-<!-- CUSTOMER INFORMATION -->
+  <!-- CUSTOMER HEADER -->
 
-<div class="info">
+  <div class="customer-header">
 
+    <div style="min-width:0;">
 
-<div class="info-row">
+      <div
+        id="customerName"
+        class="customer-name">
+      </div>
 
-<span class="label">
-Name:
-</span>
+      <div
+        id="customerCRF"
+        class="customer-crf">
+      </div>
 
-<span id="customerName"></span>
+    </div>
 
-</div>
-
-
-<div class="info-row">
-
-<span class="label">
-CRF:
-</span>
-
-<span id="customerCRF"></span>
-
-</div>
+  </div>
 
 
-<div class="info-row">
+  <!-- CUSTOMER DETAILS -->
 
-<span class="label">
-Address:
-</span>
-
-<span id="customerAddress"></span>
-
-</div>
+  <div class="customer-details">
 
 
-<div class="info-row">
+    <div class="detail-row">
 
-<span class="label">
-Phone:
-</span>
+      <div class="detail-label">
+        📍 Address
+      </div>
 
-<span id="customerPhone"></span>
+      <div
+        id="customerAddress"
+        class="detail-value">
+      </div>
 
-</div>
-
-
-<div class="info-row">
-
-<span class="label">
-Area:
-</span>
-
-<span id="customerArea"></span>
-
-</div>
+    </div>
 
 
-<div class="info-row">
+    <div class="detail-row">
 
-<span class="label">
-Last Paid Date:
-</span>
+      <div class="detail-label">
+        📞 Phone
+      </div>
 
-<span id="lastPaidDate">
-No previous payment
-</span>
+      <div
+        id="customerPhone"
+        class="detail-value">
+      </div>
 
-</div>
-
-
-<div class="info-row">
-
-<span class="label">
-PAID TILL:
-</span>
-
-<span id="paidThrough">
--
-</span>
-
-</div>
-
-</div>
+    </div>
 
 
-<!-- PAYMENT FOR -->
+    <div class="detail-row">
 
-<div class="payment-for-box">
+      <div class="detail-label">
+        Area
+      </div>
 
-<label style="margin-top:0;">
-Payment For
-</label>
+      <div
+        id="customerArea"
+        class="detail-value">
+      </div>
 
-<input
-  id="paymentFor"
-  type="month"
->
-
-<div class="payment-for-help">
-
-Select the month this collection is for.
-
-<br>
-
-The actual collection date and payment-for month
-are stored separately.
-
-</div>
-
-</div>
+    </div>
 
 
-<!-- REMARKS -->
-
-<label>
-Remarks
-</label>
-
-<textarea
-  id="remarks"
-  placeholder="Optional">
-</textarea>
+  </div>
 
 
-<div
-  id="saveMessage"
-  class="message">
-</div>
+  <!-- PAYMENT SUMMARY -->
+
+  <div class="payment-summary">
 
 
-<!-- SAVE -->
+    <div class="payment-status last-payment">
 
-<button
-  id="bottomSaveButton"
-  class="save bottom-save"
-  onclick="saveCollection()">
+      <span class="payment-status-label">
+        LAST PAYMENT
+      </span>
 
-💰 Save Collection
+      <span
+        id="lastPaidDate"
+        class="payment-status-value">
+        No previous payment
+      </span>
 
-</button>
+    </div>
+
+
+    <div class="payment-status paid-till">
+
+      <span class="payment-status-label">
+        PAID TILL
+      </span>
+
+      <span
+        id="paidThrough"
+        class="payment-status-value">
+        -
+      </span>
+
+    </div>
+
+
+  </div>
+
+
+  <!-- COLLECTION MONTH -->
+
+  <div class="collection-box">
+
+    <div class="collection-title">
+      📅 COLLECTION FOR
+    </div>
+
+    <input
+      id="paymentFor"
+      type="month"
+    >
+
+  </div>
+
+
+  <!-- REMARKS -->
+
+  <div class="remarks-box">
+
+    <label
+      class="remarks-label"
+      for="remarks">
+
+      Remarks (optional)
+
+    </label>
+
+    <textarea
+      id="remarks"
+      placeholder="Optional">
+    </textarea>
+
+  </div>
+
+
+  <!-- SAVE MESSAGE -->
+
+  <div
+    id="saveMessage"
+    class="message">
+  </div>
+
+
+  <!-- SAVE BUTTON -->
+
+  <button
+    id="bottomSaveButton"
+    class="save-button"
+    onclick="saveCollection()">
+
+    💰 SAVE COLLECTION
+
+  </button>
+
 
 </div>
 
@@ -447,15 +944,7 @@ Remarks
 /********************************************************
  * GOOGLE APPS SCRIPT WEB APP URL
  *
- * ======================================================
- * PASTE YOUR REAL WEB APP URL ONLY HERE.
- * ======================================================
- *
- * Example:
- *
- * const API_URL =
- *   'https://script.google.com/macros/s/ABC123/';
- *
+ * PASTE YOUR REAL WEB APP URL HERE.
  ********************************************************/
 
 const API_URL =
@@ -506,6 +995,30 @@ function startApplication() {
 
   setDefaultPaymentFor();
 
+
+  /*
+   * Focus CRF search box.
+   */
+
+  setTimeout(
+    function() {
+
+      const input =
+        document.getElementById(
+          'crfSearch'
+        );
+
+      if (input) {
+
+        input.focus();
+
+      }
+
+    },
+    300
+  );
+
+
   /*
    * Try synchronization immediately if online.
    */
@@ -553,7 +1066,7 @@ window.addEventListener(
     updateConnectionStatus();
 
     updateSyncInfo(
-      'Offline. Collections will be saved on this phone.'
+      'Offline • Collections saved on phone'
     );
 
   }
@@ -576,6 +1089,7 @@ function updateConnectionStatus() {
     return;
 
   }
+
 
   if (navigator.onLine) {
 
@@ -632,18 +1146,22 @@ function getCustomers() {
         CUSTOMER_KEY
       );
 
+
     if (!data) {
 
       return [];
 
     }
 
+
     const customers =
       JSON.parse(data);
+
 
     return Array.isArray(customers)
       ? customers
       : [];
+
 
   } catch (error) {
 
@@ -672,19 +1190,23 @@ function getPayments() {
         PAYMENT_KEY
       );
 
+
     if (!data) {
 
       return {};
 
     }
 
+
     const payments =
       JSON.parse(data);
+
 
     return payments &&
            typeof payments === 'object'
       ? payments
       : {};
+
 
   } catch (error) {
 
@@ -713,18 +1235,22 @@ function getPending() {
         PENDING_KEY
       );
 
+
     if (!data) {
 
       return [];
 
     }
 
+
     const pending =
       JSON.parse(data);
+
 
     return Array.isArray(pending)
       ? pending
       : [];
+
 
   } catch (error) {
 
@@ -786,11 +1312,13 @@ function setDefaultPaymentFor() {
       'paymentFor'
     );
 
+
   if (!input) {
 
     return;
 
   }
+
 
   const today =
     new Date();
@@ -835,14 +1363,6 @@ function searchCustomer() {
   }
 
 
-  /*
-   * Keep exactly what the user typed.
-   *
-   * Example:
-   * 001 → 001
-   * CRF001 → CRF001
-   */
-
   const enteredValue =
     input.value
       .trim()
@@ -850,8 +1370,7 @@ function searchCustomer() {
 
 
   /*
-   * Reset Payment For to the current month
-   * every time a customer is searched.
+   * Reset Payment For to current month.
    */
 
   setDefaultPaymentFor();
@@ -871,12 +1390,12 @@ function searchCustomer() {
 
 
   /*
-   * Convert short CRF to full CRF for searching.
+   * Convert short CRF to full CRF.
    *
-   * 001    → CRF001
-   * 01     → CRF01
-   * 1      → CRF1
-   * CRF001 → CRF001
+   * 001    -> CRF001
+   * 01     -> CRF01
+   * 1      -> CRF1
+   * CRF001 -> CRF001
    */
 
   let crf =
@@ -921,11 +1440,6 @@ function searchCustomer() {
       'none';
 
 
-    /*
-     * Keep the user's original entry
-     * in the search box.
-     */
-
     input.value =
       enteredValue;
 
@@ -936,17 +1450,12 @@ function searchCustomer() {
 
       'Customer ' +
       crf +
-      ' not found on this phone. Please wait for synchronization to complete.',
+      ' not found. Please wait for synchronization to complete.',
 
       false
 
     );
 
-
-    /*
-     * Try synchronization once when
-     * customer is not found.
-     */
 
     if (navigator.onLine) {
 
@@ -963,15 +1472,6 @@ function searchCustomer() {
     customer;
 
 
-  /*
-   * Keep the original number entered by the user.
-   *
-   * Example:
-   * User enters 001
-   * Search uses CRF001
-   * Box continues showing 001
-   */
-
   input.value =
     enteredValue;
 
@@ -986,6 +1486,7 @@ function searchCustomer() {
   );
 
 }
+
 
 /********************************************************
  * DISPLAY CUSTOMER
@@ -1041,11 +1542,7 @@ function displayCustomer(customer) {
 
 
   /*
-   * IMPORTANT:
-   *
-   * Local payment data is checked first.
-   * This prevents the display from suddenly
-   * changing to "No previous payment".
+   * Local payment data first.
    */
 
   const payments =
@@ -1098,6 +1595,30 @@ function displayCustomer(customer) {
 
   }
 
+
+  /*
+   * Scroll is not used.
+   * Move focus to collection month.
+   */
+
+  setTimeout(
+    function() {
+
+      const paymentFor =
+        document.getElementById(
+          'paymentFor'
+        );
+
+      if (paymentFor) {
+
+        paymentFor.focus();
+
+      }
+
+    },
+    100
+  );
+
 }
 
 
@@ -1134,7 +1655,7 @@ function saveCollection() {
 
       'saveMessage',
 
-      'Please select the month this collection is for.',
+      'Please select the collection month.',
 
       false
 
@@ -1161,25 +1682,13 @@ function saveCollection() {
     new Date();
 
 
-  /*
-   * Get current pending transactions.
-   */
-
   const pending =
     getPending();
 
 
-  /*
-   * Create a UNIQUE transaction ID.
-   */
-
   const transactionId =
     createTransactionId();
 
-
-  /*
-   * Create transaction object.
-   */
 
   const transaction = {
 
@@ -1192,13 +1701,12 @@ function saveCollection() {
     coveredDate:
       paymentForDate.toISOString(),
 
-crf:
-  String(
-    currentCustomer.crf || ''
-  )
-  .trim()
-  .toUpperCase(),
-
+    crf:
+      String(
+        currentCustomer.crf || ''
+      )
+      .trim()
+      .toUpperCase(),
 
     agent:
       getAgent(),
@@ -1210,7 +1718,7 @@ crf:
 
 
   /*
-   * Add transaction to pending FIRST.
+   * Add transaction to pending.
    */
 
   pending.push(
@@ -1220,9 +1728,6 @@ crf:
 
   /*
    * Save immediately to phone.
-   *
-   * Even if internet disappears,
-   * this transaction will remain.
    */
 
   localStorage.setItem(
@@ -1237,7 +1742,7 @@ crf:
 
 
   /*
-   * Update local payment display immediately.
+   * Update local payment display.
    */
 
   updateLocalPaymentSummary(
@@ -1255,7 +1760,7 @@ crf:
 
 
   /*
-   * Clear remarks only.
+   * Clear remarks.
    */
 
   if (remarksElement) {
@@ -1267,7 +1772,7 @@ crf:
 
 
   /*
-   * Tell user what happened.
+   * Show success immediately.
    */
 
   showMessage(
@@ -1276,9 +1781,9 @@ crf:
 
     navigator.onLine
 
-      ? 'Collection saved on phone. Synchronizing...'
+      ? '✅ Collection saved. Syncing...'
 
-      : 'Collection saved offline. It will synchronize when internet returns.',
+      : '✅ Collection saved offline. It will sync when internet returns.',
 
     true
 
@@ -1294,6 +1799,32 @@ crf:
     syncNow();
 
   }
+
+
+  /*
+   * Return focus to CRF after a short delay.
+   */
+
+  setTimeout(
+    function() {
+
+      const input =
+        document.getElementById(
+          'crfSearch'
+        );
+
+
+      if (input) {
+
+        input.focus();
+
+        input.select();
+
+      }
+
+    },
+    500
+  );
 
 }
 
@@ -1323,10 +1854,6 @@ function updateLocalPaymentSummary(
   const existing =
     payments[key];
 
-
-  /*
-   * Keep the latest transaction date.
-   */
 
   let lastPaymentDate =
     new Date(
@@ -1360,10 +1887,6 @@ function updateLocalPaymentSummary(
 
   }
 
-
-  /*
-   * Keep the furthest payment month.
-   */
 
   let paidThrough =
     new Date(
@@ -1420,10 +1943,6 @@ function updateLocalPaymentSummary(
   );
 
 
-  /*
-   * Refresh currently displayed customer.
-   */
-
   if (currentCustomer) {
 
     displayCustomer(
@@ -1437,14 +1956,6 @@ function updateLocalPaymentSummary(
 
 /********************************************************
  * SYNCHRONIZATION
- *
- * IMPORTANT:
- *
- * Pending transactions are NEVER deleted merely
- * because a request was sent.
- *
- * They are removed only when Apps Script returns
- * their transaction IDs inside syncedIds.
  ********************************************************/
 
 async function syncNow() {
@@ -1452,7 +1963,7 @@ async function syncNow() {
   if (!navigator.onLine) {
 
     updateSyncInfo(
-      'Offline. Waiting for internet.'
+      'Offline • Waiting for internet'
     );
 
     return;
@@ -1468,14 +1979,14 @@ async function syncNow() {
 
 
   /*
-   * Check URL.
+   * API URL check.
    */
 
   if (
     !API_URL ||
     API_URL.trim() === '' ||
     API_URL ===
-      'PASTE_YOUR_WEB_APP_URL_HERE'
+      'paste the url here'
   ) {
 
     console.error(
@@ -1484,7 +1995,7 @@ async function syncNow() {
 
 
     updateSyncInfo(
-      'Google Sheet URL is not configured.'
+      'Google Sheet URL not configured'
     );
 
     return;
@@ -1502,19 +2013,16 @@ async function syncNow() {
       getPending();
 
 
-    /*
-     * Nothing to send.
-     *
-     * Still fetch customers/payment summary
-     * from the server.
-     */
-
     updateSyncInfo(
+
       pending.length > 0
-        ? 'Synchronizing ' +
+
+        ? 'Syncing ' +
           pending.length +
           ' collection(s)...'
+
         : 'Checking collection data...'
+
     );
 
 
@@ -1589,15 +2097,9 @@ async function syncNow() {
     }
 
 
-    /****************************************************
-     * IMPORTANT
-     *
-     * Do NOT stop just because result.success
-     * is false.
-     *
-     * Apps Script can successfully sync some
-     * transactions while another one fails.
-     ****************************************************/
+    /*
+     * Confirmed transactions.
+     */
 
     const syncedIds =
       new Set(
@@ -1614,8 +2116,7 @@ async function syncNow() {
 
 
     /*
-     * Remove ONLY transactions confirmed by
-     * the server.
+     * Remove ONLY confirmed transactions.
      */
 
     if (
@@ -1655,12 +2156,9 @@ async function syncNow() {
     }
 
 
-    /****************************************************
+    /*
      * SAVE CUSTOMERS
-     *
-     * Only replace customers when the server actually
-     * returned a customer array.
-     ****************************************************/
+     */
 
     if (
       Array.isArray(
@@ -1681,73 +2179,40 @@ async function syncNow() {
     }
 
 
-    /****************************************************
+    /*
      * SAVE SERVER PAYMENT SUMMARY
-     *
-     * IMPORTANT:
-     *
-     * Merge with local payments rather than blindly
-     * replacing them.
-     *
-     * This prevents:
-     *
-     * Last Paid Date
-     *        ↓
-     * No previous payment
-     *
-     * after synchronization.
-     ****************************************************/
+     */
 
-/****************************************************
- * SAVE SERVER PAYMENT SUMMARY
- *
- * IMPORTANT:
- *
- * Always process result.payments, including when
- * Google Sheets has NO payments.
- *
- * This allows deleted collections to disappear
- * from the phone after synchronization.
- ****************************************************/
+    if (
+      result.payments &&
+      typeof result.payments === 'object'
+    ) {
 
-if (
-  result.payments &&
-  typeof result.payments === 'object'
-) {
+      mergeServerPayments(
+        result.payments,
+        getPending()
+      );
 
-  mergeServerPayments(
-    result.payments,
-    getPending()
-  );
+    } else {
 
-} else {
+      mergeServerPayments(
+        {},
+        getPending()
+      );
 
-  /*
-   * If the server returned no payment summary,
-   * use an empty object.
-   *
-   * Pending transactions are still preserved.
-   */
-
-  mergeServerPayments(
-    {},
-    getPending()
-  );
-
-}
+    }
 
 
-
-    /****************************************************
+    /*
      * UPDATE COUNTS
-     ****************************************************/
+     */
 
     updateCounts();
 
 
-    /****************************************************
+    /*
      * REFRESH CURRENT CUSTOMER
-     ****************************************************/
+     */
 
     if (currentCustomer) {
 
@@ -1796,9 +2261,9 @@ if (
     }
 
 
-    /****************************************************
-     * HANDLE RESULT
-     ****************************************************/
+    /*
+     * RESULT
+     */
 
     const failed =
       Array.isArray(
@@ -1819,15 +2284,16 @@ if (
       updateSyncInfo(
 
         remainingCount +
-        ' collection(s) waiting for retry.'
+        ' pending • Will retry automatically'
 
       );
+
 
       showMessage(
 
         'saveMessage',
 
-        'Some collections could not be synchronized yet. They remain saved on the phone and will retry automatically.',
+        'Some collections are still waiting to sync. They are safely saved on the phone.',
 
         false
 
@@ -1836,10 +2302,14 @@ if (
     } else {
 
       updateSyncInfo(
+
         remainingCount > 0
+
           ? remainingCount +
-            ' collection(s) waiting to sync.'
-          : 'All data synchronized.'
+            ' pending • Waiting to sync'
+
+          : '🟢 All data synchronized'
+
       );
 
     }
@@ -1858,18 +2328,11 @@ if (
     );
 
 
-    /*
-     * DO NOT DELETE PENDING DATA.
-     *
-     * It remains in localStorage and will be
-     * retried after 5 seconds.
-     */
-
     updateCounts();
 
 
     updateSyncInfo(
-      'Sync failed. Retrying automatically...'
+      'Sync failed • Retrying automatically'
     );
 
 
@@ -1885,17 +2348,6 @@ if (
 
 /********************************************************
  * MERGE SERVER PAYMENTS
- *
- * IMPORTANT:
- *
- * Server payment data is now the authoritative source.
- *
- * If the business owner deletes a collection from
- * the Google Sheet, that payment will disappear from
- * the phone after synchronization.
- *
- * However, collections still pending on the phone
- * are temporarily kept until they are synchronized.
  ********************************************************/
 
 function mergeServerPayments(
@@ -1906,12 +2358,9 @@ function mergeServerPayments(
   const merged = {};
 
 
-  /******************************************************
-   * 1. START WITH SERVER PAYMENTS
-   *
-   * Only payments currently existing in the
-   * Google Sheet are loaded.
-   ******************************************************/
+  /*
+   * 1. SERVER PAYMENTS
+   */
 
   if (
     serverPayments &&
@@ -1966,13 +2415,9 @@ function mergeServerPayments(
   }
 
 
-  /******************************************************
+  /*
    * 2. KEEP PENDING OFFLINE COLLECTIONS
-   *
-   * These collections are not yet in Google Sheets.
-   * Therefore they must remain visible on the phone
-   * until synchronization succeeds.
-   ******************************************************/
+   */
 
   const pending =
     Array.isArray(
@@ -2029,9 +2474,9 @@ function mergeServerPayments(
     }
 
 
-    /****************************************************
+    /*
      * PENDING TRANSACTION DATE
-     ****************************************************/
+     */
 
     const transactionDate =
       transaction.transactionDate
@@ -2073,9 +2518,9 @@ function mergeServerPayments(
     }
 
 
-    /****************************************************
+    /*
      * PENDING COVERED MONTH
-     ****************************************************/
+     */
 
     const coveredDate =
       transaction.coveredDate
@@ -2119,9 +2564,9 @@ function mergeServerPayments(
   }
 
 
-  /******************************************************
-   * 3. SAVE NEW PAYMENT SUMMARY
-   ******************************************************/
+  /*
+   * 3. SAVE
+   */
 
   localStorage.setItem(
 
@@ -2134,6 +2579,8 @@ function mergeServerPayments(
   );
 
 }
+
+
 /********************************************************
  * AUTOMATIC SYNC
  ********************************************************/
@@ -2199,10 +2646,6 @@ function getAgent() {
 
   }
 
-
-  /*
-   * Default agent.
-   */
 
   return 'AG001';
 
@@ -2300,10 +2743,7 @@ function getPaymentForDate() {
 
 
   /*
-   * Use the first day of the selected month.
-   *
-   * This is what the Apps Script backend expects
-   * for Covered Date.
+   * First day of selected month.
    */
 
   return new Date(
@@ -2563,6 +3003,63 @@ function hideMessage(id) {
     '';
 
 }
+
+
+/********************************************************
+ * ENTER KEY SUPPORT
+ ********************************************************/
+
+document
+  .getElementById('crfSearch')
+  .addEventListener(
+    'keydown',
+    function(event) {
+
+      if (
+        event.key === 'Enter'
+      ) {
+
+        event.preventDefault();
+
+        searchCustomer();
+
+      }
+
+    }
+  );
+
+
+/********************************************************
+ * SAVE WITH ENTER FROM REMARKS
+ ********************************************************/
+
+document
+  .getElementById('remarks')
+  .addEventListener(
+    'keydown',
+    function(event) {
+
+      /*
+       * Ctrl + Enter saves.
+       *
+       * Normal Enter remains available
+       * for remarks.
+       */
+
+      if (
+        event.key === 'Enter' &&
+        event.ctrlKey
+      ) {
+
+        event.preventDefault();
+
+        saveCollection();
+
+      }
+
+    }
+  );
+
 
 </script>
 
